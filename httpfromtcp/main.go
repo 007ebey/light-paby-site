@@ -3,27 +3,33 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
+	"net"
 )
 
 func main() {
-	file, err := os.Open("messages.txt")
+	listener, err := net.Listen("tcp", ":42069")
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
 
-	defer file.Close()
+	defer listener.Close()
 
-	// seperation of concern, reading part of complex file
-	for line := range getLinesChannel(file) {
-		fmt.Printf("read: %s\n", line)
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection:", err)
+		}
+		for line := range getLinesChannel(conn) {
+			fmt.Println(line)
+			break
+		}
+		conn.Close()
 	}
 
 }
 
 // <-chan string is read only channel, that sends strings
-func getLinesChannel(f io.ReadCloser) <-chan string {
+func getLinesChannel(f net.Conn) <-chan string {
 	ch := make(chan string)
 	// reading loop inside a go routine thread (lightweight)
 	go func() {
@@ -32,10 +38,7 @@ func getLinesChannel(f io.ReadCloser) <-chan string {
 		var line string
 		for {
 			n, err := f.Read(buffer)
-			if err == io.EOF {
-				ch <- "end"
-				return
-			}
+
 			part := -1
 			for i, b := range buffer[:n] {
 				if b == '\n' {
@@ -51,9 +54,11 @@ func getLinesChannel(f io.ReadCloser) <-chan string {
 				line += string(buffer[:n])
 			}
 
+			if err == io.EOF {
+				break
+			}
+
 			if err != nil {
-				// oops forgot double quotes
-				fmt.Println("Error:", err)
 				break
 			}
 		}
