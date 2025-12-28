@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	ln, _ := net.Listen("tcp", ":42069")
+	ln, err := net.Listen("tcp", ":42069")
+	if err != nil {
+		fmt.Println(err)
+	}
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
