@@ -15,14 +15,15 @@ func init() {
 		Path: "/",
 		MaxAge: 86400 * 7,
 		HttpOnly: true,
-		Secure: false
-	}
+		Secure: false}
 }
 
 const SessionName = "word_press_session"
 
 func LoginUser(w http.ResponseWriter, r *http.Request, user *models.User) error {
+
 	session, err := Store.Get(r, SessionName)
+
 	if err != nil {
 		return err
 	}
@@ -31,10 +32,10 @@ func LoginUser(w http.ResponseWriter, r *http.Request, user *models.User) error 
 	session.Values["username"] = user.Username
 	session.Values["role"] = user.Role
 
-	session.Options = &session.Options{
-		Path: "/",
-		MaxAge: 86400 * 7,
-		HttpOnly: true
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7, // 7 days
+		HttpOnly: true,
 	}
 
 	return session.Save(r, w)
@@ -67,8 +68,7 @@ func IsLoggedIn(r *http.Request) bool {
 		return false
 	}
 	_, ok := session.Values[
-		"user_id"
-	]
+		"user_id"]
 	return ok
 }
 

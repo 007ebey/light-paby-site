@@ -44,8 +44,7 @@ func GetPostByID(id int) (*Post, error) {
 		&p.Content,
 		&p.Status,
 		&p.CreatedAt,
-		&p.UpdatedAt
-	)
+		&p.UpdatedAt)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
@@ -83,8 +82,7 @@ func GetPostsByStatus(status string) ([]Post, error) {
 			&p.Content,
 			&p.Status,
 			&p.CreatedAt,
-			&p.UpdatedAt
-		)
+			&p.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -114,11 +112,10 @@ func GetPostsPaginated(limit, offset int) ([]Post, error) {
 			&p.ID,
 			&p.Title,
 			&p.Slug,
-			&p.Content
+			&p.Content,
 			&p.Status,
-			&p.CreatedAt
-			&p.UpdatedAt
-		)
+			&p.CreatedAt,
+			&p.UpdatedAt)
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -137,13 +134,14 @@ func SearchPosts(keywords string) ([]Post, error) {
 	ORDER BY created DESC
 	`
 
-	search := "%" + keyword + "%"
+	search := "%" + keywords + "%"
 
 	rows, err := database.DB.Query(query, search, search)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+	var posts []Post
 	for rows.Next() {
 		var p Post
 		rows.Scan(
@@ -153,8 +151,7 @@ func SearchPosts(keywords string) ([]Post, error) {
 			&p.Content,
 			&p.Status,
 			&p.CreatedAt,
-			&p.UpdatedAt
-		)
+			&p.UpdatedAt)
 
 		posts = append(posts, p)
 	}

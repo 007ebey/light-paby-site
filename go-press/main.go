@@ -12,13 +12,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", handlers.Home)
-	r.HandleFunc("/post/{slug}", handlers.SinglePost)
+	r.HandleFunc("/index2", handlers.Home2)
 
-	r.HandleFunc("/admin", handlers.AdminDashboard)
-	r.HandleFunc("/admin/posts", handlers.AdminPosts)
-
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
-
+	r.PathPrefix("/style/").Handler(http.StripPrefix("/style/",
+	 http.FileServer(http.Dir("./static/slowave/style")),
+	))
+	
 	http.ListenAndServe(":8080", r)
 }

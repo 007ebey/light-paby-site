@@ -21,8 +21,7 @@ type User struct {
 func CreateUser(username, email, password, role string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword(
 	[]byte(password),
-	 bcrypt.DefaultCost
-	)
+	 bcrypt.DefaultCost)
 
 	if err != nil {
 		return err
@@ -38,8 +37,7 @@ func CreateUser(username, email, password, role string) error {
 		email,
 		string(hashedPassword),
 		role,
-		time.Now()
-	)
+		time.Now())
 
 	return err
 }
@@ -54,15 +52,13 @@ func AuthenticateUser(username, password string) (*User, error) {
 	`
 	var u User
 
-	err := database.DB.QueryRow(query, username)
-	            .Scan(
+	err := database.DB.QueryRow(query, username).Scan(
 					&u.ID,
 					&u.Username,
 					&u.Email,
 					&u.Password,
 					&u.Role,
-					&u.CreatedAt
-				)
+					&u.CreatedAt)
    
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -74,8 +70,7 @@ func AuthenticateUser(username, password string) (*User, error) {
 
 	err = bcrypt.CompareHashAndPassword(
 		[]byte(u.Password),
-		[]byte(password)
-	)
+		[]byte(password))
 
 	if err != nil {
 		return nil, errors.New("invalid password")
@@ -99,8 +94,7 @@ func GetUserByID(id int) (*User, error) {
 		&u.Email,
 		&u.Password,
 		&u.Role,
-		&u.CreatedAt
-	)
+		&u.CreatedAt)
 
 	if err != nil {
 
@@ -128,8 +122,7 @@ func GetUserByUserName(username string) (*User, error) {
 		&u.Email,
 		&u.Password,
 		&u.Role,
-		&u.CreatedAt
-	)
+		&u.CreatedAt)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -161,8 +154,7 @@ func GetAllUsers() ([]User, error) {
 			&u.Email,
 			&u.Password,
 			&u.Role,
-			&u.CreatedAt
-		)
+			&u.CreatedAt)
 		users = append(users, u)
 	}
 	return users, nil
@@ -172,34 +164,30 @@ func UpdateUserRole(userID int, role string) error {
   _, err := database.DB.Exec(
 	"UPDATE users SET role = ? WHERE id = ?",
 	role,
-	userID
-  )
+	userID)
   return err
 }
 
 func DeleteUser(userID int) error {
 	_, err := database.DB.Exec(
 		"DELETE FROM users WHERE id = ?",
-		userID
-	)
+		userID)
 	return err
 }
 
 func UpdatePassword(userID int, newPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword(
 		[]byte(newPassword),
-		bcrypt.DefaultCost
-	)
+		bcrypt.DefaultCost)
 
 	if err != nil {
 		return err
 	}
 
-	_, err := database.DB.Exec(
+	_, err = database.DB.Exec(
 		"UPDATE users SET password = ? WHERE id = ?",
 		string(hashedPassword),
-		userID
-	)
+		userID)
 
 	return err
 }
