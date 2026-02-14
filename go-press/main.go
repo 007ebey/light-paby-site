@@ -13,6 +13,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", handlers.Home)
 	r.HandleFunc("/index2", handlers.Home2)
+	r.HandleFunc("/admin/sliders/create", handlers.SliderAdmin)
 
 	r.PathPrefix("/style/").Handler(http.StripPrefix("/style/",
 	 http.FileServer(http.Dir("./static/slowave/style")),
