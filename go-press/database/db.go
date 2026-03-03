@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 var DB *sql.DB
@@ -10,13 +11,13 @@ var DB *sql.DB
 func InitDB() {
 	db, _ := sql.Open("sqlite3", "cms.db")
 	DB = db
-	DB.Exec(`
+	_, err := DB.Exec(`
 	CREATE TABLE IF NOT EXISTS users (
-	   id INTEGER PRIMARY KEY,
+	   id INTEGER PRIMARY KEY AUTOINCREMENT,
 	   username TEXT UNIQUE NOT NULL,
 	   email TEXT UNIQUE NOT NULL,
-	   password TEXT UNIQUE NOT NULL,
-	   role TEXT NOT NULL DEFAULT 'subscriber'
+	   password TEXT NOT NULL,
+	   role TEXT NOT NULL DEFAULT 'subscriber',
 	   created DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 	
@@ -43,4 +44,8 @@ func InitDB() {
 	   created DATETIME
 	);
 	`)
+
+	log.Println(err)
+
+	SeedAdminUser()
 }

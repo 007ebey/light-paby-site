@@ -1,0 +1,76 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1 class="pull-left">Manage Blog Posts</h1>
+
+    <a href="/admin/posts/create" class="btn btn-primary pull-right">
+      + New Post
+    </a>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+
+    {{ if .Posts }}
+
+    <div class="grid-blog col3">
+
+      {{ range .Posts }}
+      <div class="post">
+
+        <figure class="icon-overlay medium icn-link">
+          <a href="/blog/{{ .Slug }}">
+            <img src="{{ if .FeaturedImage }}{{ .FeaturedImage }}{{ else }}/static/slowave/images/art/gb1.jpg{{ end }}" />
+          </a>
+        </figure>
+
+        <div class="image-caption">
+
+          <h3 class="post-title">
+            <a href="/blog/{{ .Slug }}">{{ .Title }}</a>
+          </h3>
+
+          <div class="meta">
+            <span class="date">{{ .Created }}</span>
+            <span class="status">{{ .Status }}</span>
+          </div>
+
+          <p>
+            {{ if .Excerpt }}
+              {{ .Excerpt }}
+            {{ else }}
+              {{ printf "%.120s" .Content }}...
+            {{ end }}
+          </p>
+
+          <!-- 🔥 ADMIN ACTIONS -->
+          <div style="margin-top:10px;">
+            <a href="/admin/posts/edit/{{ .ID }}" class="btn btn-small btn-blue">Edit</a>
+
+            <a href="/admin/posts/delete/{{ .ID }}"
+               class="btn btn-small btn-red"
+               onclick="return confirm('Delete this post?')">
+               Delete
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {{ end }}
+
+    </div>
+
+    {{ else }}
+
+      <p>No posts found.</p>
+
+    {{ end }}
+
+  </div>
+</div>
+
+{{ end }}

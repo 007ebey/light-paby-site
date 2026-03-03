@@ -1,122 +1,113 @@
 {{ define "content" }}
 
-<div class="light-wrapper">
-  <div class="container inner">
+<div class="container inner">
 
-    <h2 class="section-title">Create Slider</h2>
+  <h2>Create Slider</h2>
 
-    <div class="divide20"></div>
+  <form method="POST" action="/admin/sliders/create" enctype="multipart/form-data">
 
-    <div class="form-container">
+    <div class="form-group">
 
-      <form method="POST"
-            enctype="multipart/form-data"
-            class="forms">
+      <label>Title</label>
 
-        <fieldset>
-
-          <ol>
-
-            <!-- Title -->
-            <li class="form-row text-input-row">
-              <label>Title</label>
-              <input type="text"
-                     name="title"
-                     class="text-input defaultText required"
-                     title="Slider Title"
-                     required />
-            </li>
-
-            <!-- Subtitle -->
-            <li class="form-row text-area-row">
-              <label>Subtitle</label>
-              <textarea name="subtitle"
-                        class="text-area required"
-                        rows="4"
-                        required></textarea>
-            </li>
-
-            <!-- Image -->
-            <li class="form-row text-input-row">
-              <label>Slider Image</label>
-              <input type="file"
-                     name="image"
-                     class="text-input required"
-                     accept="image/*"
-                     required />
-              <small>Recommended size: 1920x800</small>
-            </li>
-
-            <!-- Button Text -->
-            <li class="form-row text-input-row">
-              <label>Button Text</label>
-              <input type="text"
-                     name="button_text"
-                     class="text-input defaultText"
-                     title="Button Text" />
-            </li>
-
-            <!-- Button URL -->
-            <li class="form-row text-input-row">
-              <label>Button URL</label>
-              <input type="text"
-                     name="button_url"
-                     class="text-input defaultText"
-                     title="Button URL" />
-            </li>
-
-            <!-- Sort Order -->
-            <li class="form-row text-input-row">
-              <label>Sort Order</label>
-              <input type="number"
-                     name="sort_order"
-                     class="text-input defaultText"
-                     value="1"
-                     min="0" />
-            </li>
-
-            <!-- Status -->
-            <li class="form-row text-input-row">
-              <label>Status</label>
-
-              <select name="status"
-                      class="text-input">
-
-                <option value="active">
-                  Active
-                </option>
-
-                <option value="inactive">
-                  Inactive
-                </option>
-
-              </select>
-
-            </li>
-
-            <!-- Submit -->
-            <li class="button-row">
-
-              <input type="submit"
-                     value="Create Slider"
-                     class="btn btn-submit bm0" />
-
-              <a href="/admin/sliders"
-                 class="btn btn-border bm0">
-                 Cancel
-              </a>
-
-            </li>
-
-          </ol>
-
-        </fieldset>
-
-      </form>
+      <input type="text" name="title" class="form-control" required>
 
     </div>
 
-  </div>
+
+    <div class="form-group">
+
+      <label>Subtitle</label>
+
+      <textarea name="subtitle" id="subtitle" class="form-control"></textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Slider Image</label>
+
+      <input type="file" name="image" accept="image/*" required>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Button Text</label>
+
+      <input type="text" name="button_text" class="form-control">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Button URL</label>
+
+      <input type="text" name="button_url" class="form-control">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Status</label>
+
+      <select name="status" class="form-control">
+
+        <option value="active">Active</option>
+
+        <option value="inactive">Inactive</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <button type="submit" class="btn btn-primary">
+
+        Create Slider
+
+      </button>
+
+      <a href="/admin/sliders" class="btn btn-default">
+
+        Cancel
+
+      </a>
+
+    </div>
+
+  </form>
+
 </div>
+
+
+<!-- TinyMCE -->
+
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+
+<script>
+
+  tinymce.init({
+
+    selector: '#subtitle',
+
+    height: 200,
+
+    menubar: false,
+
+    plugins: 'link lists',
+
+    toolbar: 'bold italic | bullist numlist | link'
+
+  });
+
+</script>
+
 
 {{ end }}

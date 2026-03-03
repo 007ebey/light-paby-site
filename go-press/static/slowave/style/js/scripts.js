@@ -313,7 +313,7 @@ jQuery(document).ready(function () {
 /*	FORM
 /*-----------------------------------------------------------------------------------*/
 jQuery(document).ready(function ($) {
-    $('.forms').dcSlickForms();
+    $('.forms').dcSlickForms({ajaxSubmit: false});
 });
 $(document).ready(function () {
     $('.comment-form input[title], .comment-form textarea').each(function () {

@@ -1,0 +1,100 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>Edit Blog Post</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+
+    {{ if .Error }}
+      <div class="alert alert-danger">{{ .Error }}</div>
+    {{ end }}
+
+    <!-- ✅ FIX: correct action with ID -->
+    <form method="POST" action="/admin/posts/edit/{{ .Post.ID }}">
+
+      <!-- TITLE -->
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" required
+          value="{{ if .Form.title }}{{ .Form.title }}{{ else }}{{ .Post.Title }}{{ end }}">
+      </div>
+
+      <!-- SLUG -->
+      <div class="form-group">
+        <label>Slug</label>
+        <input type="text" name="slug" class="form-control"
+          value="{{ if .Form.slug }}{{ .Form.slug }}{{ else }}{{ .Post.Slug }}{{ end }}">
+      </div>
+
+        <!-- ✅ Current Featured Image -->
+      <div class="form-group">
+        <label>Current Image</label><br>
+        {{ if .Post.FeaturedImage }}
+          <img src="{{ .Post.FeaturedImage }}" style="max-width:200px;">
+        {{ else }}
+          <p>No image uploaded</p>
+        {{ end }}
+      </div>
+
+      <!-- ✅ Upload New Image -->
+      <div class="form-group">
+        <label>Replace Image</label>
+        <input type="file" name="featured_image" class="form-control">
+      </div>
+
+      <!-- CONTENT -->
+      <div class="form-group">
+        <label>Content</label>
+        <textarea id="editor" name="content">
+{{ if .Form.content }}{{ .Form.content }}{{ else }}{{ .Post.Content }}{{ end }}
+        </textarea>
+      </div>
+
+      <!-- STATUS -->
+      <div class="form-group">
+        <label>Status</label>
+        <select name="status" class="form-control">
+
+          <option value="draft"
+            {{ if eq (or .Form.status .Post.Status) "draft" }}selected{{ end }}>
+            Draft
+          </option>
+
+          <option value="published"
+            {{ if eq (or .Form.status .Post.Status) "published" }}selected{{ end }}>
+            Published
+          </option>
+
+        </select>
+      </div>
+
+      <br>
+
+      <button type="submit" class="btn btn-primary">
+        Update Post
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- TinyMCE -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+
+<script>
+tinymce.init({
+  selector: '#editor',
+  height: 400,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
+});
+</script>
+
+{{ end }}

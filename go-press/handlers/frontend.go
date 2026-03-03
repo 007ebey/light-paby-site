@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"word_press/models"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -19,10 +18,18 @@ func Home2(w http.ResponseWriter, r *http.Request) {
 
 func SliderAdmin(w http.ResponseWriter, r *http.Request) {
 	Render(w, "admin/create-slider.html", map[string]interface{}{
-		"SiteTitle": "Admin: Slide",
+		"SiteTitle": "Admin: Slide Add",
 	})
 }
 
 func AdminSliders(w http.ResponseWriter, r *http.Request) {
-	
+	Render(w, "admin/sliders.html", map[string]interface{}{
+		"SiteTitle": "Admin: Slide",
+	})
+}
+
+func Blog(w http.ResponseWriter, r *http.Request) {
+	Render(w, "blog.html", map[string]interface{}{
+		"SiteTitle": "Blog",
+	})
 }

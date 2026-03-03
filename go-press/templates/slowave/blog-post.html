@@ -1,0 +1,117 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1 class="pull-left">{{ .Post.Title }}</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+
+    {{ if .Post }}
+
+    <div class="blog classic-blog">
+
+      <div class="post">
+
+        <!-- Featured Image -->
+        <figure class="main">
+          {{ if .Post.FeaturedImage }}
+            <img src="{{ .Post.FeaturedImage }}" alt="">
+          {{ else }}
+            <img src="/static/slowave/style/images/art/b1.jpg" alt="">
+          {{ end }}
+        </figure>
+
+        <!-- Title -->
+        <h2 class="post-title">{{ .Post.Title }}</h2>
+
+        <!-- Meta -->
+        <div class="meta">
+          <span class="date">
+            {{ .Post.CreatedAt.Format "02 Jan 2006" }}
+          </span>
+          <span class="comments">
+            <a href="#comments">
+              {{ len .Comments }} Comments
+            </a>
+          </span>
+        </div>
+
+        <!-- Content (IMPORTANT: raw HTML render) -->
+        <div class="post-content">
+          {{ .Post.Content }}
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- COMMENTS SECTION -->
+    <div id="comments">
+
+      <h3>{{ len .Comments }} Comments</h3>
+
+      {{ if .Comments }}
+        <ol class="commentlist">
+          {{ range .Comments }}
+          <li class="comment">
+            <div class="comment-body">
+
+              <div class="user">
+                <strong>{{ .Author }}</strong>
+                <span class="date">
+                  {{ .CreatedAt.Format "02 Jan 2006 15:04" }}
+                </span>
+              </div>
+
+              <p>{{ .Body }}</p>
+
+            </div>
+          </li>
+          {{ end }}
+        </ol>
+      {{ else }}
+        <p>No comments yet.</p>
+      {{ end }}
+
+    </div>
+
+    <!-- COMMENT FORM -->
+    <div class="comment-form">
+
+      <h3>Leave a Comment</h3>
+
+      <form method="POST" action="/blog/{{ .Post.Slug }}/comment">
+
+        <div class="form-group">
+          <input type="text" name="author" placeholder="Your Name" required>
+        </div>
+
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Your Email" required>
+        </div>
+
+        <div class="form-group">
+          <textarea name="body" placeholder="Your Comment" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Submit Comment
+        </button>
+
+      </form>
+
+    </div>
+
+    {{ else }}
+      <h3>Post not found</h3>
+    {{ end }}
+
+  </div>
+</div>
+
+{{ end }}

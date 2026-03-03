@@ -21,9 +21,9 @@
 			align: 'left',
 			animateError: true,
 			animateD: 10,
-			ajaxSubmit: true,
 			errorH: 24,
-			successH: 40
+			successH: 40,
+			ajaxSubmit: false
 		};
 
 		//call in the default otions
@@ -86,6 +86,7 @@
 				if ($('.error',$form).length) {
 					masonryHeight();
 					$('.btn-submit',this).before($error.clone().text(textError));
+					console.log('DEBUG HERE')
 				} else {
 					if(defaults.ajaxSubmit == true){
 						
@@ -98,8 +99,10 @@
 							$('.boxes.masoned').animate({height: x+'px'},400);
 							$('fieldset',this).slideUp();
 						});
+						console.log('DEBUG HERE')
 					} else {
 						$form.submit();
+						console.log('SUBMISSION HERE')
 					}
 				}
 				// Prevent form submission

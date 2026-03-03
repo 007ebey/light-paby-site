@@ -1,0 +1,76 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>Create Blog Post</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+
+    {{ if .Error }}
+      <div class="alert alert-danger">{{ .Error }}</div>
+    {{ end }}
+
+    <form method="POST" action="/admin/posts/create">
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control"
+               value="{{ .Form.title }}" required>
+      </div>
+
+      <div class="form-group">
+        <label>Slug</label>
+        <input type="text" name="slug" class="form-control"
+               value="{{ .Form.slug }}">
+      </div>
+
+      <div class="form-group">
+       <label>Featured Image</label>
+       <input type="file" name="featured_image" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Content</label>
+        <!-- WYSIWYG -->
+        <textarea id="editor" name="content">
+{{ .Form.content }}
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select name="status" class="form-control">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+      </div>
+
+      <br>
+
+      <button type="submit" class="btn btn-primary">
+        Save Post
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- ✅ TinyMCE CDN -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+
+<script>
+tinymce.init({
+  selector: '#editor',
+  height: 400,
+  plugins: 'link image code lists',
+  toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
+});
+</script>
+
+{{ end }}

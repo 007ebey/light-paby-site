@@ -1,0 +1,202 @@
+{{ define "content" }}
+
+<!--/.navbar -->
+<div class="offset"></div>
+<div class="light-wrapper page-title">
+    <div class="container inner">
+        <h1>Login Page</h1>
+    </div>
+</div>
+<div class="dark-wrapper">
+    <div class="container inner">
+        {{ if .User }}
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Welcome back, {{ .User.Username }} 👋</h3>
+                <p>You are already logged in.</p>
+
+                <div class="divide15"></div>
+
+                <a href="/blog" class="btn">Checkout Blog</a>
+
+                {{ if and .User (or (eq .User.Role "admin") (eq .User.Role "editor")) }}
+                  <a href="/admin/posts" class="btn btn-border">Manage Posts</a>
+                {{ end }}
+
+                <div class="divide20"></div>
+
+                <a href="/logout" class="btn btn-red">Logout</a>
+
+            </div>
+        </div>
+        {{ else }}
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Registered Customers</h3>
+                <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+                    Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+                <div class="divide15"></div>
+                {{ if .Error }}
+                <div class="alert alert-danger">
+                    {{ .Error }}
+                </div>
+                {{ end }}
+                <div class="divide15"></div>
+                <div class="form-container">
+                    <form class="forms" action="/login" method="POST">
+                        <fieldset>
+                            <ol>
+                                <li class="form-row text-input-row email-field">
+                                    <input type="text" name="username" class="text-input defaultText required"
+                                        title="Username or Email (Required)" value="{{ .Form.username }}" />
+                                </li>
+                                <li class="form-row text-input-row password-field">
+                                    <input type="password" name="password"
+                                        class="text-input defaultText required password" title="Password (Required)" />
+                                </li>
+                                <li class="button-row">
+                                    <input type="submit" value="Login" name="submit"
+                                        class="btn btn-submit bm0 pull-left" />
+                                    <p class="forgot">Forgot your <a href="#">username</a> or <a href="#">password</a>?
+                                    </p>
+                                </li>
+                            </ol>
+                        </fieldset>
+                    </form>
+                </div>
+                <!-- /.form-container -->
+
+            </div>
+            <div class="col-sm-6">
+                <h3>New User? Register Now!</h3>
+                <p>Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cum sociis natoque
+                    penatibus et magnis dis parturient montes, nascetur ridiculus mus. </p>
+                <a href="/register" class="btn">Sign Up</a>
+                <div class="divide20"></div>
+                <h3>Or connect with your social profile</h3>
+                <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis
+                    in, egestas eget quam.</p>
+                <div class="connect"> <a href="#" class="btn btn-large share-facebook"><i class="icon-s-facebook"></i>
+                        Connect with Facebook</a> <a href="#" class="btn btn-large share-twitter"><i
+                            class="icon-s-twitter"></i> Connect with Twitter</a> </div>
+                <!-- /.connect -->
+            </div>
+        </div>
+        {{ end }}
+    </div>
+    <!-- /.container -->
+</div>
+<!-- /.dark-wrapper -->
+
+<footer class="black-wrapper">
+    <div class="container inner">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="widget"> <img src="style/images/logo.png" data-at2x="style/images/logo@2x.png" alt="" />
+                    <div class="divide20"></div>
+                    <p>Aenean lacinia bibendum nulla sed leo posuere erat a ante venenatis dapibus posuere velit
+                        aliquet. Donec ullamcorper metus auctor fringi. Nullam quis risus. </p>
+                    <p>Vestibulum id ligula porta euismod semper. Maecenas faucibus mollis.</p>
+                    <div class="divide5"></div>
+                    <ul class="social">
+                        <li><a href="#"><i class="icon-s-rss"></i></a></li>
+                        <li><a href="#"><i class="icon-s-twitter"></i></a></li>
+                        <li><a href="#"><i class="icon-s-facebook"></i></a></li>
+                        <li><a href="#"><i class="icon-s-pinterest"></i></a></li>
+                        <li><a href="#"><i class="icon-s-linkedin"></i></a></li>
+                    </ul>
+                </div>
+                <!-- /.widget -->
+            </div>
+            <!-- /col -->
+
+            <div class="col-sm-3">
+                <div class="widget">
+                    <h3 class="section-title widget-title upper">Popular Posts</h3>
+                    <ul class="post-list">
+                        <li>
+                            <h6><a href="blog-post.html">Vivamus sagittis lacus vel augue metus</a></h6>
+                            <em>3th Oct 2012</em>
+                        </li>
+                        <li>
+                            <h6><a href="blog-post.html">Scelerisque nisl consectetur et</a></h6>
+                            <em>28th Sep 2012</em>
+                        </li>
+                        <li>
+                            <h6><a href="blog-post.html">Pellentesque ornare sem lacinia quam</a></h6>
+                            <em>15th Aug 2012</em>
+                        </li>
+                    </ul>
+                    <!-- /.post-list -->
+                </div>
+                <!-- /.widget -->
+            </div>
+            <!-- /col -->
+
+            <div class="col-sm-3">
+                <div class="widget">
+                    <h3 class="section-title widget-title upper">Get In Touch</h3>
+                    <p>Fusce dapibus, tellus commodo, tortor mauris condimentum utellus fermentum, porta sem malesuada
+                        magna. Sed posuere consectetur est at lobortis.</p>
+                    <div class="divide10"></div>
+                    <div class="contact-info"> <i class="icon-location"></i> Moonshine St. 14/05 Light City <br />
+                        <i class="icon-phone"></i>+00 (123) 456 78 90 <br />
+                        <i class="icon-mail"></i> <a href="first.last@email.com">first.last@email.com</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /col -->
+
+            <div class="col-sm-3">
+                <div class="widget">
+                    <h3 class="section-title widget-title upper">Tags</h3>
+                    <div class="tagcloud"> <a href="#" style="font-size: 9pt;">blogroll</a> <a href="#"
+                            style="font-size: 19pt;">daily</a> <a href="#" style="font-size: 9pt;">dialog</a> <a
+                            href="#" style="font-size: 9pt;">gallery</a> <a href="#"
+                            style="font-size: 10pt;">journal</a> <a href="#" style="font-size: 9pt;">link</a> <a
+                            href="#" style="font-size: 12pt;">motion</a> <a href="#" style="font-size: 9pt;">music</a>
+                        <a href="#" style="font-size: 20pt;">photo</a> <a href="#"
+                            style="font-size: 13pt;">professional</a> <a href="#" style="font-size: 16pt;">quotation</a>
+                        <a href="#" style="font-size: 9pt;">show</a> <a href="#" style="font-size: 15pt;">sound</a> <a
+                            href="#" style="font-size: 9pt;">tv</a> <a href="#" style="font-size: 9pt;">video</a> <a
+                            href="#" style="font-size: 9pt;">gift</a> <a href="#" style="font-size: 19pt;">label</a> <a
+                            href="#" style="font-size: 9pt;">christmas</a> </div>
+                </div>
+                <!-- /.widget -->
+                <div class="divide30"></div>
+                <div class="widget">
+                    <h3 class="section-title widget-title upper">Newsletter</h3>
+                    <form id="newsletter" class="form-inline newsletter" role="form">
+                        <div>
+                            <label class="sr-only" for="exampleInputEmail">Email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail" placeholder="Enter email">
+                        </div>
+                        <button type="submit" class="btn btn-default btn-submit"><i
+                                class="icon-paper-plane"></i></button>
+                    </form>
+                </div>
+                <!-- /.widget -->
+
+            </div>
+            <!-- /col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- .container -->
+    <div class="sub-footer">
+        <div class="container">
+            <p class="pull-left">© 2014 Slowave. All rights reserved. Theme by <a
+                    href="http://elemisfreebies.com">elemis</a>.</p>
+            <ul class="footer-menu pull-right">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Portfolio</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+<!-- /footer -->
+
+{{ end }}

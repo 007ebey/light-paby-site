@@ -1,0 +1,110 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>Sign Up</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+    <div class="row">
+
+      <!-- LEFT: REGISTER FORM -->
+      <div class="col-sm-6">
+
+        <h3>Create an Account</h3>
+
+        {{ if .Error }}
+        <div class="alert alert-danger">
+          {{ .Error }}
+        </div>
+        {{ end }}
+
+        <div class="form-container">
+
+          <!-- ✅ change action -->
+          <form class="forms" action="/register" method="POST">
+
+            <fieldset>
+              <ol>
+
+                <!-- USERNAME -->
+                <li class="form-row text-input-row">
+                  <input type="text"
+                         name="username"
+                         class="text-input required"
+                         placeholder="Username"
+                         value="{{ .Form.username }}">
+                </li>
+
+                <!-- EMAIL -->
+                <li class="form-row text-input-row">
+                  <input type="email"
+                         name="email"
+                         class="text-input required"
+                         placeholder="Email"
+                         value="{{ .Form.email }}">
+                </li>
+
+                <!-- PASSWORD -->
+                <li class="form-row text-input-row">
+                  <input type="password"
+                         name="password"
+                         class="text-input required"
+                         placeholder="Password">
+                </li>
+
+                <!-- CONFIRM PASSWORD -->
+                <li class="form-row text-input-row">
+                  <input type="password"
+                         name="confirm_password"
+                         class="text-input required"
+                         placeholder="Confirm Password">
+                </li>
+
+                <!-- SUBMIT -->
+                <li class="button-row">
+                  <input type="submit"
+                         value="Sign Up"
+                         class="btn btn-submit bm0 pull-left" />
+
+                  <p class="forgot">
+                    Already have an account?
+                    <a href="/login">Login</a>
+                  </p>
+                </li>
+
+              </ol>
+            </fieldset>
+
+          </form>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="col-sm-6">
+
+        <h3>Why Join?</h3>
+
+        <p>
+          Create an account to manage content, posts, and your dashboard.
+        </p>
+
+        <ul>
+          <li>✔ Manage posts</li>
+          <li>✔ Access admin dashboard</li>
+          <li>✔ Upload sliders</li>
+        </ul>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{{ end }}

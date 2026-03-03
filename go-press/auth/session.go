@@ -55,8 +55,17 @@ func GetCurrentUser(r *http.Request) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	userID, ok := session.Values["user_id"].(int)
+	id, ok := session.Values["user_id"]
 	if !ok {
+		return nil, nil
+	}
+	var userID int 
+	switch v := id.(type) {
+	case int:
+		userID = v
+	case int64:
+		userID = int(v)
+	default:
 		return nil, nil
 	}
 	return models.GetUserByID(userID)
@@ -78,6 +87,24 @@ func RequireLogin(next http.HandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
+		next(w, r)
+	}
+}
+
+func RequireAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := GetCurrentUser(r)
+
+		if err != nil || user == nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		if user.Role != "admin" {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
 		next(w, r)
 	}
 }
