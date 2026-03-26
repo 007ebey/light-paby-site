@@ -12,11 +12,13 @@
   <div class="container inner">
 
     {{ if .Error }}
-      <div class="alert alert-danger">{{ .Error }}</div>
+    <div class="alert alert-danger">{{ .Error }}</div>
     {{ end }}
 
     <!-- ✅ FIX: correct action with ID -->
-    <form method="POST" action="/admin/posts/edit/{{ .Post.ID }}">
+    <form method="POST" action="/admin/posts/edit/{{ .Post.ID }}"
+       enctype="multipart/form-data"
+    >
 
       <!-- TITLE -->
       <div class="form-group">
@@ -32,13 +34,22 @@
           value="{{ if .Form.slug }}{{ .Form.slug }}{{ else }}{{ .Post.Slug }}{{ end }}">
       </div>
 
-        <!-- ✅ Current Featured Image -->
+      <!-- Excerpt -->
+      <div class="form-group">
+        <label>Excerpt</label>
+        <textarea name="excerpt" class="form-control" rows="3">
+{{ if .Form.excerpt }}{{ .Form.excerpt }}{{ else }}{{ .Post.Excerpt }}{{ end }}
+  </textarea>
+      </div>
+
+
+      <!-- ✅ Current Featured Image -->
       <div class="form-group">
         <label>Current Image</label><br>
         {{ if .Post.FeaturedImage }}
-          <img src="{{ .Post.FeaturedImage }}" style="max-width:200px;">
+        <img src="{{ .Post.FeaturedImage }}" style="max-width:200px;">
         {{ else }}
-          <p>No image uploaded</p>
+        <p>No image uploaded</p>
         {{ end }}
       </div>
 
@@ -52,7 +63,7 @@
       <div class="form-group">
         <label>Content</label>
         <textarea id="editor" name="content">
-{{ if .Form.content }}{{ .Form.content }}{{ else }}{{ .Post.Content }}{{ end }}
+{{ if .Form.content }}{{ .Form.content }}{{ else }}{{ .Post.Content | safeHTML }}{{ end }}
         </textarea>
       </div>
 
@@ -61,13 +72,11 @@
         <label>Status</label>
         <select name="status" class="form-control">
 
-          <option value="draft"
-            {{ if eq (or .Form.status .Post.Status) "draft" }}selected{{ end }}>
+          <option value="draft" {{ if eq (or .Form.status .Post.Status) "draft" }}selected{{ end }}>
             Draft
           </option>
 
-          <option value="published"
-            {{ if eq (or .Form.status .Post.Status) "published" }}selected{{ end }}>
+          <option value="published" {{ if eq (or .Form.status .Post.Status) "published" }}selected{{ end }}>
             Published
           </option>
 
@@ -89,12 +98,12 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 
 <script>
-tinymce.init({
-  selector: '#editor',
-  height: 400,
-  plugins: 'link image code lists',
-  toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
-});
+  tinymce.init({
+    selector: '#editor',
+    height: 400,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
+  });
 </script>
 
 {{ end }}

@@ -24,7 +24,8 @@
 
         <figure class="icon-overlay medium icn-link">
           <a href="/blog/{{ .Slug }}">
-            <img src="{{ if .FeaturedImage }}{{ .FeaturedImage }}{{ else }}/static/slowave/images/art/gb1.jpg{{ end }}" />
+            <img
+              src="{{ if .FeaturedImage }}{{ .FeaturedImage }}{{ else }}/static/slowave/images/art/gb1.jpg{{ end }}" />
           </a>
         </figure>
 
@@ -35,15 +36,15 @@
           </h3>
 
           <div class="meta">
-            <span class="date">{{ .Created }}</span>
+            <span class="date">{{ .CreatedAt.Format "02 Jan 2006" }}</span>
             <span class="status">{{ .Status }}</span>
           </div>
 
           <p>
             {{ if .Excerpt }}
-              {{ .Excerpt }}
+            {{ .Excerpt }}
             {{ else }}
-              {{ printf "%.120s" .Content }}...
+            {{ printf "%.120s" .Content | safeHTML }}...
             {{ end }}
           </p>
 
@@ -51,11 +52,11 @@
           <div style="margin-top:10px;">
             <a href="/admin/posts/edit/{{ .ID }}" class="btn btn-small btn-blue">Edit</a>
 
-            <a href="/admin/posts/delete/{{ .ID }}"
-               class="btn btn-small btn-red"
-               onclick="return confirm('Delete this post?')">
-               Delete
-            </a>
+            <form method="POST" action="/admin/posts/delete/{{ .ID }}" style="display:inline;">
+              <button class="btn btn-small btn-red" onclick="return confirm('Delete this post?')">
+                Delete
+              </button>
+            </form>
           </div>
 
         </div>
@@ -66,7 +67,7 @@
 
     {{ else }}
 
-      <p>No posts found.</p>
+    <p>No posts found.</p>
 
     {{ end }}
 

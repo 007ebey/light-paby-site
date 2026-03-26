@@ -5,8 +5,8 @@ import (
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	Render(w, "index.html", map[string]interface{}{
-		"SiteTitle": "Cool Site",
+	Render(w, "updated-index.html", map[string]interface{}{
+		"SiteTitle": "Pastor Aby & Pastor Smitha",
 	})
 }
 

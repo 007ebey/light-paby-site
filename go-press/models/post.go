@@ -6,6 +6,7 @@ import (
   "time"
   "database/sql"
   "fmt"
+  "log"
 )
 
 type Post struct {
@@ -31,7 +32,7 @@ func GetPublishedPosts() ([]Post, error) {
 			 &p.Slug,
 			&p.Content,
 			&p.Excerpt,
-			&p.AuthorID
+			&p.AuthorID,
 			&p.FeaturedImage)
 		posts = append(posts, p)
 	}
@@ -55,7 +56,7 @@ func GetPostByID(id int) (*Post, error) {
 		&p.Content,
 		&p.Status,
 		&p.Excerpt,
-		&p.AuthorID
+		&p.AuthorID,
 		&p.FeaturedImage,
 		&p.CreatedAt,
 		&p.UpdatedAt)
@@ -236,7 +237,7 @@ func GetPostCount(status string) (int, error) {
 func CreatePost(title, slug, content, status string, authorID int, excerpt string, featuredImage string) error {
 
 	if slug == "" {
-		slug = utils.generateSlug(title)
+		slug = utils.GenerateSlug(title)
 	}
 
 	query := `
@@ -247,26 +248,27 @@ func CreatePost(title, slug, content, status string, authorID int, excerpt strin
 	_, err := database.DB.Exec(
 		query,
 		title,
-		slug,authorID
+		slug,
 		content,
 		status,
 		excerpt,
 		authorID,
-		featured_image,
+		featuredImage,
 	)
 
 	return err
 }
 
-func UpdatePost(id int, title, slug, content, status, excerpt, authorID, featuredImage string) error {
+func UpdatePost(id int, title, slug, content, status, excerpt string, authorID int, featuredImage string) error {
 
 	if slug == "" {
-		slug = utils.generateSlug(title)
+		slug = utils.GenerateSlug(title)
 	}
+	log.Println(featuredImage)
 
 	query :=
 	  `
-	  UPDATE posts SET title = ?,  slug = ?, content = ?, status = ?, excerpt = ?, author_id = ?, featured_image = ?, updated = datatime('now')
+	  UPDATE posts SET title = ?,  slug = ?, content = ?, status = ?, excerpt = ?, author_id = ?, featured_image = ?, updated = datetime('now')
 	  WHERE id = ?
 	  `
 	result, err := database.DB.Exec(query, title, slug, content, status, excerpt, authorID, featuredImage, id)
@@ -289,7 +291,11 @@ func UpdatePost(id int, title, slug, content, status, excerpt, authorID, feature
 
 func GetAllPosts() ([]Post, error) {
 	rows, err := database.DB.Query(`
-	   SELECT id, title, slug, content, status, excerpt, author_id, featured_image, created
+	   SELECT id, title, slug, content, status, 
+	   COALESCE(excerpt, ''),
+	   author_id, 
+	   COALESCE(featured_image, ''), 
+	   created
 	   FROM posts 
 	   ORDER BY created DESC
 	`)
@@ -310,7 +316,7 @@ func GetAllPosts() ([]Post, error) {
 			&p.Status,
 			&p.Excerpt,
 			&p.AuthorID,
-			&p.FeaturedImage
+			&p.FeaturedImage,
 			&p.CreatedAt,
 		)
 		if err != nil {
@@ -319,4 +325,24 @@ func GetAllPosts() ([]Post, error) {
 		posts = append(posts, p)
 	}
 	return posts, nil 
+}
+
+func DeletePost(id int) error {
+	query := `DELETE FROM posts WHERE id = ?`
+
+	result, err := database.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("post not found")
+	}
+
+	return nil
 }

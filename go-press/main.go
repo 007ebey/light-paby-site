@@ -25,9 +25,18 @@ func main() {
 
 	r.HandleFunc("/admin/posts/edit/{id}", auth.RequireLogin(auth.RequireAdmin(handlers.AdminEditPost)))
 
-	r.PathPrefix("/style/").Handler(http.StripPrefix("/style/",
-	 http.FileServer(http.Dir("./static/slowave/style")),
-	))
-	
+	r.HandleFunc("/admin/posts/delete/{id}",
+	 auth.RequireLogin(auth.RequireAdmin(handlers.AdminDeletePost)),
+	).Methods("POST")
+
+	r.PathPrefix("/style/").
+    Handler(http.StripPrefix("/style/",
+        http.FileServer(http.Dir("./static/slowave/style")),
+    ))
+
+	r.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
+      http.ServeFile(w, r, "./static/slowave/style/css/bootstrap.css")
+    })
+
 	http.ListenAndServe(":8080", r)
 }

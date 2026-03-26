@@ -1,9 +1,11 @@
+package utils
+
 import (
 	"regexp"
 	"strings"
 )
 
-func generateSlug(title string) {
+func GenerateSlug(title string) string {
 	// lowercase
 	slug := strings.ToLower(title)
 

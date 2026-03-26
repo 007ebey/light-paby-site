@@ -3,17 +3,31 @@ package handlers
 import (
 	"word_press/models"
 	"word_press/auth"
+	"word_press/utils"
 	"net/http"
 	"github.com/gorilla/mux"
-	"strings"
     "strconv"
+	"fmt"
+	"time"
+	"io"
+	"os"
+	"log"
+	"image"
+	"image/jpeg"
+	"image/png"
 )
 
 
 func AdminPosts(w http.ResponseWriter, r *http.Request) {
-	posts, _ := models.GetAllPosts()
+	posts, err := models.GetAllPosts()
 
 	user, _ := auth.GetCurrentUser(r) 
+
+	if err != nil {
+       log.Println("AdminPosts error:", err)
+	   http.Error(w, err.Error(), http.StatusInternalServerError)
+	   return
+	}
 
 	Render(w, "admin/posts.html", map[string]interface{}{
 	    "SiteTitle": "Manage Posts",
@@ -35,6 +49,7 @@ func AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 		slug := r.FormValue("slug")
 		content := r.FormValue("content")
 		status := r.FormValue("status")
+		excerpt := r.FormValue("excerpt")
 
 		if title == "" || content == "" {
 			data["Error"] = "Title and Content required"
@@ -48,10 +63,62 @@ func AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if slug == "" {
-			slug = strings.ToLower(strings.ReplaceAll(title, " ", "-"))
+			slug = utils.GenerateSlug(title)
 		}
 
-		err := models.CreatePost(title, slug, content, status, user.ID)
+		var imagePath string
+
+		file, handler, err := r.FormFile("featured_image")
+
+		if err == nil {
+			defer file.Close()
+
+			os.MkdirAll("static/uploads", os.ModePerm)
+			filename := fmt.Sprintf("%d_%s", time.Now().Unix(), handler.Filename)
+			path := "static/uploads/" + filename
+
+			dst, err := os.Create(path)
+			if err == nil {
+				
+			}
+			defer dst.Close()
+			if handler.Size > 600*1024 {
+                img, format, err := image.Decode(file)
+				if err != nil {
+					http.Error(w, "Invalid image", 400)
+					return
+				}
+				switch format {
+				case "jpeg", "jpg":
+					jpeg.Encode(dst, img, &jpeg.Options{
+						Quality: 70,
+					})
+				case "png":
+					encoder := png.Encoder{
+						CompressionLevel: png.BestCompression,
+					}
+					// do for both cases
+					encoder.Encode(dst, img)
+                default:
+					http.Error(w, "Unsupported image type", 400)
+					return
+				}
+			} else {
+                io.Copy(dst, file)
+			}
+             
+		    imagePath = "/" + path
+		}
+
+		err = models.CreatePost(
+			title, 
+			slug, 
+			content, 
+			status,
+			user.ID,
+			excerpt,
+		    imagePath,
+		)
 
 		if err != nil {
 			data["Error"] = err.Error()
@@ -71,6 +138,7 @@ func AdminEditPost(w http.ResponseWriter, r *http.Request) {
 
 	idStr := mux.Vars(r)["id"]
 	id, _ := strconv.Atoi(idStr)
+	
 
 	post, err := models.GetPostByID(id)
 	if err != nil {
@@ -89,8 +157,66 @@ func AdminEditPost(w http.ResponseWriter, r *http.Request) {
 		slug  := r.FormValue("slug")
 		content := r.FormValue("content")
 		status := r.FormValue("status")
+		excerpt := r.FormValue("excerpt")
+
+		// keep old image by default
+		imagePath := post.FeaturedImage
+
+		file, handler, err := r.FormFile("featured_image")
+
+		if err == nil {
+			defer file.Close()
+			os.MkdirAll("static/uploads", os.ModePerm)
+
+			filename := fmt.Sprintf("%d_%s", time.Now().Unix(), handler.Filename)
+			path := "static/uploads/" + filename
+
+			dst, err := os.Create(path)
+			if err != nil {
+				return
+			}
+			defer dst.Close()
+			
+			if handler.Size > 600*1024 {
+				img, format, err := image.Decode(file)
+				if err != nil {
+					http.Error(w, "Invalid image", 400)
+					return
+				}
+				switch format {
+				case "jpeg", "jpg":
+					jpeg.Encode(dst, img, &jpeg.Options{
+						Quality: 70,
+					})
+				case "png":
+					encoder := png.Encoder{
+						CompressionLevel: png.BestCompression,
+					}
+					// do for both cases
+					encoder.Encode(dst, img)
+                default:
+					http.Error(w, "Unsupported image type", 400)
+					return
+				}
+			} else {
+				// small file -> just copy
+				io.Copy(dst, file)
+			}
+
+			imagePath = "/" + path
+		}
+
+		log.Println("Editting image", err)
 		
-		err := models.UpdatePost(id, title, slug, content, status)
+		err = models.UpdatePost(id,
+			title,
+			slug,
+			content, 
+			status, 
+			excerpt, 
+			user.ID, 
+			imagePath)
+
 		if err != nil {
 			data["Error"] = err.Error()
 			Render(w, "admin/edit-post.html", data)
@@ -112,9 +238,27 @@ func BlogPost(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	comments, _ := models.GetCommentsByPost(post.ID)
 	Render(w, "blog-post.html", map[string]interface{}{
 		"Post": post,
+		"Comments": comments,
 	})
 }
 
+func AdminDeletePost(w http.ResponseWriter, r *http.Request) {
+	idStr := mux.Vars(r)["id"]
+	id, err := strconv.Atoi(idStr)
 
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	err = models.DeletePost(id)
+	if err != nil {
+		http.Error(w, "Failed to delete post", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
+}

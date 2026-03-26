@@ -43,7 +43,7 @@
 
         <!-- Content (IMPORTANT: raw HTML render) -->
         <div class="post-content">
-          {{ .Post.Content }}
+          {{ .Post.Content | safeHTML }}
         </div>
 
       </div>

@@ -12,27 +12,40 @@
   <div class="container inner">
 
     {{ if .Error }}
-      <div class="alert alert-danger">{{ .Error }}</div>
+    <div class="alert alert-danger">{{ .Error }}</div>
     {{ end }}
 
-    <form method="POST" action="/admin/posts/create">
+    <form method="POST" action="/admin/posts/create" enctype="multipart/form-data">
 
       <div class="form-group">
         <label>Title</label>
-        <input type="text" name="title" class="form-control"
-               value="{{ .Form.title }}" required>
+        <input type="text" name="title" class="form-control" value="{{ .Form.title }}" required>
       </div>
 
       <div class="form-group">
         <label>Slug</label>
-        <input type="text" name="slug" class="form-control"
-               value="{{ .Form.slug }}">
+        <input type="text" name="slug" class="form-control" value="{{ .Form.slug }}">
+      </div>
+
+      <!-- Excerpt -->
+      <div class="form-group">
+        <label>Excerpt</label>
+        <textarea name="excerpt" class="form-control" rows="3"
+                  placeholder="Short summary for blog listings">{{ .Form.excerpt }}</textarea>
       </div>
 
       <div class="form-group">
-       <label>Featured Image</label>
-       <input type="file" name="featured_image" class="form-control">
+        <label>Featured Image</label>
+
+        {{ if .Post.FeaturedImage }}
+        <div style="margin-bottom:10px;">
+          <img src="{{ .Post.FeaturedImage }}" style="max-width:200px;">
+        </div>
+        {{ end }}
+
+        <input type="file" name="featured_image" class="form-control">
       </div>
+
 
       <div class="form-group">
         <label>Content</label>
@@ -65,12 +78,12 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 
 <script>
-tinymce.init({
-  selector: '#editor',
-  height: 400,
-  plugins: 'link image code lists',
-  toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
-});
+  tinymce.init({
+    selector: '#editor',
+    height: 400,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
+  });
 </script>
 
 {{ end }}
