@@ -132,42 +132,80 @@
 
 <!-- CONTACT -->
 
-<div id="contact" class="dark-wrapper">
+<div id="contact-form" class="dark-wrapper">
   <div class="container inner text-center">
     <div class="section-title">
       <h2>Contact Us</h2>
     </div>
 
-```
-<form>
-  <div class="row">
-    <div class="col-sm-6">
-      <input type="text" class="form-control" placeholder="Your Name" required>
-    </div>
-    <div class="col-sm-6">
-      <input type="email" class="form-control" placeholder="Your Email" required>
-    </div>
-  </div>
+    <form class="forms" action="/contact" method="POST">
 
-  <div class="divide20"></div>
+      <input type="hidden" name="form_type" value="contact">
 
-  <textarea class="form-control" rows="5" placeholder="Your Message" required></textarea>
+      {{ if .Error }}
+      <div class="alert alert-danger">
+        {{ .Error }}
+      </div>
+      {{ end }}
 
-  <div class="divide20"></div>
+      {{ if .Success }}
+      <div class="alert alert-success">
+        {{ .Success }}
+      </div>
+      {{ end }}
 
-  <button type="submit" class="btn btn-primary">Send Message</button>
-</form>
-```
+      <div class="row">
+        <div class="col-sm-6">
+          <input 
+            type="text" 
+            name="name" 
+            class="form-control" 
+            placeholder="Your Name" 
+            value="{{ with .FormData }}{{ index . "name" }}{{ end }}"
+            required>
+        </div>
+
+        <div class="col-sm-6">
+          <input 
+            type="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="Your Email" 
+            value="{{ with .FormData }}{{ index . "email" }}{{ end }}"
+            required>
+        </div>
+      </div>
+
+      <div class="divide20"></div>
+
+      <textarea 
+        name="message" 
+        class="form-control" 
+        rows="5" 
+        placeholder="Your Message"
+        required>{{ with .FormData }}{{ index . "message" }}{{ end }}</textarea>
+
+      <div class="divide20"></div>
+
+      <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
 
   </div>
 </div>
 
 <!-- FOOTER -->
 
-<footer class="black-wrapper">
-  <div class="container inner text-center">
-    <p>© 2025 Pastor Aby & Pastor Smitha | HISnearness KR Puram Campus</p>
-  </div>
-</footer>
+ <footer class="black-wrapper">
+    <div class="sub-footer">
+      <div class="container">
+        <p class="pull-left">© 2025 Pastor Aby & Pastor Smitha | HISnearness KR Puram Campus</p>
+ 
+        <ul class="footer-menu pull-right">
+          <li><a href="#">Home</a></li>
+          <li><a href="/login">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 
 {{ end }}

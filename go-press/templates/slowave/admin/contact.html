@@ -1,0 +1,57 @@
+{{ define "content" }}
+
+<div class="offset"></div>
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1 class="pull-left">Contact Messages</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner">
+
+    {{ if .Contacts }}
+
+    <div class="grid-blog col2">
+
+      {{ range .Contacts }}
+      <div class="post">
+
+        <div class="image-caption">
+          <h4>{{ .Name }} ({{ .Email }})</h4>
+
+          <div class="meta">
+            <span class="date">{{ .CreatedAt.Format "02 Jan 2006 15:04" }}</span>
+            <span class="comments">{{ .Status }}</span>
+          </div>
+
+          <p>{{ .Message }}</p>
+
+          <div style="margin-top:10px;">
+            <!-- <a href="/admin/contact/read?id={{ .ID }}" class="btn btn-small">Mark Read</a>
+            <a href="/admin/contact/delete?id={{ .ID }}" class="btn btn-small btn-red">Delete</a> -->
+            <form action="/admin/contact/read" method="POST" style="display:inline;">
+              <input type="hidden" name="id" value="{{ .ID }}">
+              <button type="submit" class="btn btn-small">Read</button>
+            </form>
+            <form action="/admin/contact/delete" method="POST" style="display:inline;">
+              <input type="hidden" name="id" value="{{ .ID }}">
+              <button type="submit" class="btn btn-small btn-red">Delete</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+      {{ end }}
+
+    </div>
+
+    {{ else }}
+    <p>No contact messages yet.</p>
+    {{ end }}
+
+  </div>
+</div>
+
+{{ end }}

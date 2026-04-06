@@ -8,6 +8,7 @@ import (
 type RenderOptions struct {
 	Page string
 	Header string
+	Footer string
 	Data interface{}
 }
 
@@ -42,9 +43,30 @@ func Render(w http.ResponseWriter, page string, data interface{}){
 
 func RenderWithOpts(w http.ResponseWriter, opts RenderOptions){
 
+	if (opts.Header == "default") {
+		opts.Header = "header.html"
+	}
+
+	if (opts.Footer == "default") {
+		opts.Footer = "footer.html"
+	}
+
 	funcMap := template.FuncMap{
 		"safeHTML": func(s string) template.HTML {
 			return template.HTML(s)
+		},
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+		"seq": func(start, end int) []int {
+			var s []int
+			for i := start; i <= end; i++ {
+				s = append(s, i)
+			}
+			return s
 		},
 	}
 
@@ -53,7 +75,7 @@ func RenderWithOpts(w http.ResponseWriter, opts RenderOptions){
 		ParseFiles(
 			"templates/slowave/layout.html",
 			"templates/slowave/" + opts.Header,
-			"templates/slowave/footer.html",
+			"templates/slowave/" + opts.Footer,
 			"templates/slowave/" + opts.Page,
 		)
 

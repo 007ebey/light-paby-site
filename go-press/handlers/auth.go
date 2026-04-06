@@ -5,43 +5,76 @@ import (
 	"word_press/models"
 	"word_press/auth"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	currentUser, _ := auth.GetCurrentUser(r)
+
 	data := map[string]interface{}{
 		"SiteTitle": "Login",
 	}
 
-	if r.Method == http.MethodPost {
+	recentPosts, err2 := models.GetRecentPosts(3)
 
+	log.Println(err2)
+    
+	// 🔴 Critical: handle already logged-in users FIRST
+	if currentUser != nil {
+		data["User"] = currentUser
+
+		if err2 == nil {
+			log.Println(err2)
+			log.Println(recentPosts)
+			data["RecentPosts"] = recentPosts
+		}
+
+		renderLogin(w, data)
+		return
+	}
+
+	if r.Method == http.MethodPost {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
 		user, err := models.AuthenticateUser(username, password)
-
 		if err != nil {
 			data["Error"] = "Invalid username or password"
 			data["Form"] = map[string]string{
 				"username": username,
 			}
-			Render(w, "login.html", data)
+			renderLogin(w, data)
 			return
 		}
 
-		err = auth.LoginUser(w, r, user)
-		if err != nil {
-			data["Error"] = "Failed to create sesson"
-			Render(w, "login.html", data)
+		if err := auth.LoginUser(w, r, user); err != nil {
+			data["Error"] = "Failed to create session"
+			renderLogin(w, data)
 			return
+		}
+
+		if err2 == nil {
+			log.Println(err2)
+			log.Println(recentPosts)
+			data["RecentPosts"] = recentPosts
 		}
 
 		data["User"] = user
-        
-		Render(w, "login.html", data)
+		renderLogin(w, data)
 		return
 	}
 
-	Render(w, "login.html", data)
+	renderLogin(w, data)
+}
+
+// 🔴 Extract rendering (you were repeating yourself everywhere)
+func renderLogin(w http.ResponseWriter, data map[string]interface{}) {
+	RenderWithOpts(w, RenderOptions{
+		Page:   "login.html",
+		Header: "login-header.html",
+		Footer: "default",
+		Data:   data,
+	})
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

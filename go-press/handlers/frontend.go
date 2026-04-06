@@ -2,11 +2,27 @@ package handlers
 
 import (
 	"net/http"
+    "word_press/models"
+	"log"
+	"strconv"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	Render(w, "updated-index.html", map[string]interface{}{
+	success := r.URL.Query().Get("success")
+
+	data := map[string]interface{}{
 		"SiteTitle": "Pastor Aby & Pastor Smitha",
+	}
+
+	if success == "1" {
+		data["Success"] = "Your message has been sent successfully!"
+	}
+
+	RenderWithOpts(w, RenderOptions{
+		Page: "updated-index.html",
+        Header: "home-header.html",
+		Footer: "default",
+		Data: data,
 	})
 }
 
@@ -29,7 +45,44 @@ func AdminSliders(w http.ResponseWriter, r *http.Request) {
 }
 
 func Blog(w http.ResponseWriter, r *http.Request) {
-	Render(w, "blog.html", map[string]interface{}{
-		"SiteTitle": "Blog",
+    // We only want to show "published" posts to the public
+    pageStr := r.URL.Query().Get("page")
+	page := 1
+
+	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+		page = p
+	}
+
+	limit := 10
+	offset := (page - 1) * limit
+
+	posts, err := models.GetPostsByStatusPaginated("published", limit, offset)
+	if err != nil {
+		log.Println("Blog fetch error:", err)
+		http.Error(w, "Unable to load the blog at this time", http.StatusInternalServerError)
+		return
+	}
+	allPosts, err := models.GetPostsByStatus("published")
+	if err != nil {
+		http.Error(w, "Count error", http.StatusInternalServerError)
+		return 
+	}
+	total := len(allPosts)
+	totalPages := (total + limit - 1) / limit
+
+	log.Println("Number of blogs gotten", totalPages)
+
+	data :=  map[string]interface{}{
+		"SiteTitle":  "Blog",
+		"Posts":      posts,
+		"Page":       page,
+		"TotalPages": totalPages,
+	}
+	RenderWithOpts(w, RenderOptions{
+			Page:   "blog.html",
+			Header: "home-header.html",
+			Footer: "default",
+			Data:   data,
 	})
+	return
 }

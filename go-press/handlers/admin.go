@@ -84,3 +84,4 @@ func AdminCreateSlider(w http.ResponseWriter, r *http.Request) {
 
 	Render(w, "admin/create-slider.html", data)
 }
+

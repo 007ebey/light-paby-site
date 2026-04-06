@@ -39,6 +39,30 @@ func GetPublishedPosts() ([]Post, error) {
 	return posts, nil
 }
 
+func GetRecentPosts(limit int) ([]Post, error) {
+	rows, err := database.DB.Query(`
+		SELECT id, title, slug, created
+		FROM posts
+		WHERE status = 'published'
+		ORDER BY created DESC
+		LIMIT ?`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(&p.ID, &p.Title, &p.Slug, &p.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
 func GetPostByID(id int) (*Post, error) {
 	query :=
 	`
@@ -173,6 +197,49 @@ func GetPostsPaginated(limit, offset int) ([]Post, error) {
 			&p.UpdatedAt)
 		posts = append(posts, p)
 	}
+	return posts, nil
+}
+
+func GetPostsByStatusPaginated(status string, limit, offset int) ([]Post, error) {
+	query := `
+	SELECT id, title, slug, content, status, excerpt, author_id, featured_image, created, updated
+	FROM posts
+	WHERE status = ?
+	ORDER BY created DESC
+	LIMIT ? OFFSET ?
+	`
+
+	rows, err := database.DB.Query(query, status, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(
+			&p.ID,
+			&p.Title,
+			&p.Slug,
+			&p.Content,
+			&p.Status,
+			&p.Excerpt,
+			&p.AuthorID,
+			&p.FeaturedImage,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return posts, nil
 }
 

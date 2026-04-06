@@ -107,7 +107,7 @@ func AdminCreatePost(w http.ResponseWriter, r *http.Request) {
                 io.Copy(dst, file)
 			}
              
-		    imagePath = "/" + path
+		    imagePath = "/uploads/" + filename 
 		}
 
 		err = models.CreatePost(
@@ -203,7 +203,7 @@ func AdminEditPost(w http.ResponseWriter, r *http.Request) {
 				io.Copy(dst, file)
 			}
 
-			imagePath = "/" + path
+			imagePath = "/uploads/" + filename
 		}
 
 		log.Println("Editting image", err)
@@ -234,14 +234,22 @@ func BlogPost(w http.ResponseWriter, r *http.Request) {
 	slug := vars["slug"]
 
 	post, err := models.GetPostBySlug(slug)
+	user, _ := auth.GetCurrentUser(r)
+
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 	comments, _ := models.GetCommentsByPost(post.ID)
-	Render(w, "blog-post.html", map[string]interface{}{
-		"Post": post,
-		"Comments": comments,
+	RenderWithOpts(w, RenderOptions{
+		Page:   "blog-post.html",
+		Header: "blog-header.html",
+		Footer: "default",
+		Data: map[string]interface{}{
+			"Post":     post,
+			"Comments": comments,
+			"User":     user,
+		},
 	})
 }
 

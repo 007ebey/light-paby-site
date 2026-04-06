@@ -51,34 +51,47 @@
     </div>
 
     <!-- COMMENTS SECTION -->
-    <div id="comments">
+   <div id="comments">
 
-      <h3>{{ len .Comments }} Comments</h3>
+  <h3>{{ len .Comments }} Comments</h3>
 
-      {{ if .Comments }}
-        <ol class="commentlist">
-          {{ range .Comments }}
-          <li class="comment">
-            <div class="comment-body">
+  {{ if .Comments }}
+    <ol class="commentlist">
+      {{ range .Comments }}
+      <li class="comment">
+        <div class="comment-body">
 
-              <div class="user">
-                <strong>{{ .Author }}</strong>
-                <span class="date">
-                  {{ .CreatedAt.Format "02 Jan 2006 15:04" }}
-                </span>
-              </div>
+          <div class="user">
+            <strong>{{ .Author }}</strong>
+            <span class="date">
+              {{ .CreatedAt.Format "02 Jan 2006 15:04" }}
+            </span>
+          </div>
 
-              <p>{{ .Body }}</p>
+          <p>{{ .Body }}</p>
 
-            </div>
-          </li>
+          <!-- DELETE BUTTON (only for owner) -->
+           {{ if or (eq $.User.Role "admin") (eq $.User.Email .Email) }}
+          <div style="margin-top:10px;">
+            <form method="POST" action="/comment/delete" style="display:inline;">
+              <input type="hidden" name="id" value="{{ .ID }}">
+              <input type="hidden" name="slug" value="{{ $.Post.Slug }}">
+              <button type="submit" class="btn btn-small btn-red">
+                Delete
+              </button>
+            </form>
+          </div>
           {{ end }}
-        </ol>
-      {{ else }}
-        <p>No comments yet.</p>
-      {{ end }}
 
-    </div>
+        </div>
+      </li>
+      {{ end }}
+    </ol>
+  {{ else }}
+    <p>No comments yet.</p>
+  {{ end }}
+
+   </div>
 
     <!-- COMMENT FORM -->
     <div class="comment-form">
@@ -114,4 +127,58 @@
   </div>
 </div>
 
+<footer class="black-wrapper">
+  <div class="container inner">
+    <div class="row">
+      <div class="col-sm-9">
+        <div class="widget"> <img src="/style/images/logo.png" data-at2x="/style/images/logo@2x.png" alt="" height="80"
+            width="240" />
+          <div class="divide20"></div>
+          <p>Welcome to our ministry at HISnearness KR Puram Campus under Prophet Shyju Mathew and Prophetess Tiny
+            Mathew. We offer marriage, career, and personal counselling with biblical guidance, prayer, and support to
+            help individuals and families grow spiritually and walk in their God-given purpose.</p>
+          <p>Pastor Aby and Pastor Smitha lead with a passion for revival and discipleship, helping people encounter God
+            daily. Our vision is to see lives transformed, living victoriously and impacting the world through prayer,
+            love, and God’s presence.</p>
+          <div class="divide5"></div>
+          <ul class="social">
+            <li><a href="#"><i class="icon-s-rss"></i></a></li>
+            <li><a href="#"><i class="icon-s-twitter"></i></a></li>
+            <li><a href="#"><i class="icon-s-facebook"></i></a></li>
+            <li><a href="#"><i class="icon-s-pinterest"></i></a></li>
+            <li><a href="#"><i class="icon-s-linkedin"></i></a></li>
+          </ul>
+        </div>
+        <!-- /.widget -->
+      </div>
+
+      <div class="col-sm-3">
+        <div class="widget">
+          <h3 class="section-title widget-title upper">Get In Touch</h3>
+          <p>Bengaluru, India</p>
+          <div class="divide10"></div>
+          <div class="contact-info">
+            <i class="icon-location"></i> 1st Floor, No.141, Sri Shanti Towers, Service Rd, East of NGEF Layout, Kasturi Nagar, Bengaluru, Karnataka 560043<br />
+            <i class="icon-phone"></i>079757 05046<br />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sub-footer">
+    <div class="container">
+      <p class="pull-left">© 2026 Pastors Aby & Smitha. All rights reserved.</p>
+      <ul class="footer-menu pull-right">
+        <li><a href="/">Home</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="#">Blog</a></li>
+        {{ if and .User (or (eq .User.Role "admin") (eq .User.Role "editor")) }}
+        <li><a href="/admin/posts">Edit Posts</a></li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
+</footer>
 {{ end }}

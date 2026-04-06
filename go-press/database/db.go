@@ -43,6 +43,18 @@ func InitDB() {
 	   status TEXT,
 	   created DATETIME
 	);
+
+	-- CONTACTS TABLE (new)
+	CREATE TABLE IF NOT EXISTS contacts (
+	   id INTEGER PRIMARY KEY AUTOINCREMENT,
+	   name TEXT NOT NULL,
+	   email TEXT NOT NULL,
+	   message TEXT NOT NULL,
+	   status TEXT DEFAULT 'new', -- new, read, replied, spam
+	   ip_address TEXT,
+	   created DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
 	`)
 
 	log.Println(err)
