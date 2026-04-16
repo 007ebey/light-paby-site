@@ -66,7 +66,7 @@ func main() {
 	blog.HandleFunc("", handlers.Blog) // /blog
 	blog.HandleFunc("/{slug}", blogHandler.BlogPost)
 	blog.HandleFunc("/{slug}/comment", blogHandler.CreateComment).Methods("POST")
-	blog.HandleFunc("/comment/delete", blogHandler.DeleteComment).Methods("POST")
+	blog.HandleFunc("/{slug}/comment/delete", blogHandler.DeleteComment).Methods("POST")
 
 	// =========================
 	// ADMIN ROUTES

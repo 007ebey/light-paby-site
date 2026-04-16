@@ -16,6 +16,9 @@ type AdminHandler struct {
 	ContactService services.ContactService
 }
 
+var getCurrentUser = auth.GetCurrentUser
+var render = RenderWithOpts
+
 func NewAdminHandler(s services.PostService, is services.ImageService, cs services.ContactService) *AdminHandler {
 	return &AdminHandler{
 		PostService: s,
@@ -25,7 +28,12 @@ func NewAdminHandler(s services.PostService, is services.ImageService, cs servic
 }
 
 func (h *AdminHandler) AdminPosts(w http.ResponseWriter, r *http.Request) {
-	user, _ := auth.GetCurrentUser(r)
+	user, _ := getCurrentUser(r)
+
+	if user == nil {
+	  http.Error(w, "Unauthorized", 401)
+	  return
+    }
 
 	posts, err := h.PostService.GetAllPosts()
 	if err != nil {
@@ -33,7 +41,7 @@ func (h *AdminHandler) AdminPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderWithOpts(w, RenderOptions{
+	render(w, RenderOptions{
 		Page:   "admin/posts.html",
 		Header: "posts-header.html",
 		Footer: "posts-footer.html",
@@ -46,7 +54,12 @@ func (h *AdminHandler) AdminPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
-	user, _ := auth.GetCurrentUser(r)
+	user, _ := getCurrentUser(r)
+
+	if user == nil {
+	  http.Error(w, "Unauthorized", 401)
+	  return
+    }
 
 	data := map[string]interface{}{
 		"SiteTitle": "Create Post",
@@ -67,7 +80,7 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 				"slug":    slug,
 				"content": content,
 			}
-			RenderWithOpts(w, RenderOptions{
+			render(w, RenderOptions{
 		          Page:   "admin/create-post.html",
 		          Header: "posts-header.html",
 		          Footer: "posts-footer.html",
@@ -106,7 +119,7 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 		err = h.PostService.CreatePost(post)
 		if err != nil {
 			data["Error"] = err.Error()
-			RenderWithOpts(w, RenderOptions{
+			render(w, RenderOptions{
 		          Page:   "admin/create-post.html",
 		          Header: "posts-header.html",
 		          Footer: "posts-footer.html",
@@ -119,7 +132,7 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderWithOpts(w, RenderOptions{
+	render(w, RenderOptions{
 		Page:   "admin/create-post.html",
 		Header: "posts-header.html",
 		Footer: "posts-footer.html",
@@ -128,7 +141,12 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
-	user, _ := auth.GetCurrentUser(r)
+	user, _ := getCurrentUser(r)
+
+	if user == nil {
+	  http.Error(w, "Unauthorized", 401)
+	  return
+    }
 
 	idStr := mux.Vars(r)["id"]
 	id, _ := strconv.Atoi(idStr)
@@ -176,7 +194,7 @@ func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
 		err = h.PostService.UpdatePost(post)
 		if err != nil {
 			data["Error"] = err.Error()
-			RenderWithOpts(w, RenderOptions{
+			render(w, RenderOptions{
 		      Page:   "admin/edit-post.html",
 		      Header: "posts-header.html",
 		      Footer: "posts-footer.html",
@@ -189,7 +207,7 @@ func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderWithOpts(w, RenderOptions{
+	render(w, RenderOptions{
 		Page:   "admin/edit-post.html",
 		Header: "posts-header.html",
 		Footer: "posts-footer.html",
@@ -236,7 +254,7 @@ func (h *AdminHandler) ManageQueries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	RenderWithOpts(w, RenderOptions{
+	render(w, RenderOptions{
 		Page:   "admin/contact.html",
 		Header: "contact-header.html",
 		Footer: "contact-footer.html",

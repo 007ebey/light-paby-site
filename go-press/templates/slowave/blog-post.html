@@ -73,7 +73,7 @@
           <!-- DELETE BUTTON (only for owner) -->
            {{ if or (eq $.User.Role "admin") (eq $.User.Email .Email) }}
           <div style="margin-top:10px;">
-            <form method="POST" action="/comment/delete" style="display:inline;">
+            <form method="POST" action="/blog/{{ $.Post.Slug }}/comment/delete" style="display:inline;">
               <input type="hidden" name="id" value="{{ .ID }}">
               <input type="hidden" name="slug" value="{{ $.Post.Slug }}">
               <button type="submit" class="btn btn-small btn-red">
