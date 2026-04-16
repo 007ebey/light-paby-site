@@ -1,0 +1,61 @@
+{{ define "header" }}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/static/slowave/images/favicon.png">
+    <title>{{ .SiteTitle }}</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/style/css/bootstrap.css" rel="stylesheet">
+    <link href="/style/css/settings.css" rel="stylesheet">
+    <link href="/style/css/owl.carousel.css" rel="stylesheet">
+    <link href="/style/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="/style/js/fancybox/jquery.fancybox.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="/style/js/fancybox/helpers/jquery.fancybox-thumbs.css?v=1.0.2" rel="stylesheet"
+        type="text/css" />
+    <link href="/style/style.css" rel="stylesheet">
+    <link href="/style/css/color/blue.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,500,600,700,800,900' rel='stylesheet'
+        type='text/css'>
+    <link href="/style/type/fontello.css" rel="stylesheet">
+    <link href="/style/type/picons.css" rel="stylesheet">
+    <link href="/style/type/budicons.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="/static/slowave/js/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+      <![endif]-->
+</head>
+
+<body class="full-layout">
+    <div class="body-wrapper">
+        <div class="yamm navbar basic default">
+            <div class="navbar-header">
+                <div class="container">
+                    <div class="basic-wrapper"> <a class="btn responsive-menu pull-right" data-toggle="collapse"
+                            data-target=".navbar-collapse"><i class='icon-menu-1'></i></a> <a class="navbar-brand"
+                            href="/"><img src="/style/images/logo.png" data-at2x="/style/images/logo@2x.png"
+                                alt="" 
+                                height="32"
+                                width="120"
+                                /></a> </div>
+                    <div class="collapse navbar-collapse pull-right">
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown"><a href="#" class="dropdown-toggle js-activated">Posts</a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/login">Login</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+
+{{ end }}

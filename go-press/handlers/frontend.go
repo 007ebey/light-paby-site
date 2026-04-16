@@ -70,6 +70,16 @@ func Blog(w http.ResponseWriter, r *http.Request) {
 	total := len(allPosts)
 	totalPages := (total + limit - 1) / limit
 
+	var showAdminLinks bool
+	user, ok := r.Context().Value("user").(*models.User)
+	if ok && user != nil {
+	    if user.Role == "admin" || user.Role == "editor" {
+			showAdminLinks = true
+		}
+	}
+
+	log.Println("Show admin link", showAdminLinks)
+
 	log.Println("Number of blogs gotten", totalPages)
 
 	data :=  map[string]interface{}{
@@ -77,6 +87,7 @@ func Blog(w http.ResponseWriter, r *http.Request) {
 		"Posts":      posts,
 		"Page":       page,
 		"TotalPages": totalPages,
+		"ShowAdminLinks": showAdminLinks, 
 	}
 	RenderWithOpts(w, RenderOptions{
 			Page:   "blog.html",

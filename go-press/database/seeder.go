@@ -2,15 +2,31 @@ package database
 
 import (
 	"log"
+	"os"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/joho/godotenv"
 )
 
 func SeedAdminUser() {
-	var exists int 
 
-	err := DB.QueryRow(
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found (this is fine in prod)")
+	}
+
+	adminUser := os.Getenv("ADMIN_USER")
+	adminPass := os.Getenv("ADMIN_PASS")
+	forceUpdate := os.Getenv("ADMIN_FORCE_UPDATE") == "true"
+
+	if adminUser == "" || adminPass == "" {
+		log.Println("Missing ADMIN_USER or ADMIN_PASS")
+		return
+	}
+
+	var exists int
+	err = DB.QueryRow(
 		"SELECT COUNT(1) FROM users WHERE username = ?",
-		"admin",
+		adminUser,
 	).Scan(&exists)
 
 	if err != nil {
@@ -18,33 +34,43 @@ func SeedAdminUser() {
 		return
 	}
 
-	if exists > 0 {
-		log.Println("Admin user already exists")
-		return
-	}
-
-	password  := "admin123"
-
 	hashedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(password),
+		[]byte(adminPass),
 		bcrypt.DefaultCost,
 	)
-
 	if err != nil {
 		log.Println("Password hash error:", err)
 		return
 	}
 
-	// insert user
+	if exists > 0 {
+		if forceUpdate {
+			_, err := DB.Exec(
+				"UPDATE users SET password = ? WHERE username = ?",
+				string(hashedPassword),
+				adminUser,
+			)
+			if err != nil {
+				log.Println("Password update error:", err)
+				return
+			}
+			log.Println("Admin password updated")
+		} else {
+			log.Println("Admin user already exists (no update)")
+		}
+		return
+	}
+
+	// Create admin if not exists
 	_, err = DB.Exec(`
-	  INSERT INTO users (username, email, password, role)
-	  VALUES (?, ?, ?, ?)     
+		INSERT INTO users (username, email, password, role)
+		VALUES (?, ?, ?, ?)     
 	`,
-      "admin",
-	  "admin@example.com",
-	  string(hashedPassword),
-	  "admin",  
-    )
+		adminUser,
+		"admin@example.com",
+		string(hashedPassword),
+		"admin",
+	)
 
 	if err != nil {
 		log.Println("Seeder insert error:", err)
@@ -52,5 +78,4 @@ func SeedAdminUser() {
 	}
 
 	log.Println("Default admin user created")
-	log.Println("Username: admin")
 }

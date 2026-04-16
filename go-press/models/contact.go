@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 	"word_press/database"
+	"errors"
 )
 
 type Contact struct {
@@ -35,6 +36,10 @@ func CreateContact(name, email, message, ip string) error {
 }
 
 func GetContactsByStatus(status string) ([]Contact, error) {
+	if database.DB == nil {
+		return nil, errors.New("DB not initialized")
+	}
+
 	rows, err := database.DB.Query(`
 		SELECT id, name, email, message, status, ip_address, created
 		FROM contacts

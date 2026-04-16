@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"github.com/gorilla/sessions"
 	"word_press/models"
+	"log"
+	"fmt"
 )
 
 var Store = sessions.NewCookieStore([]byte(`
@@ -51,50 +53,99 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) error {
 }
 
 func GetCurrentUser(r *http.Request) (*models.User, error) {
+	if Store == nil {
+		return nil, fmt.Errorf("store is nil")
+	}
+
 	session, err := Store.Get(r, SessionName)
 	if err != nil {
 		return nil, err
 	}
+
+	if session == nil {
+		return nil, fmt.Errorf("session is nil")
+	}
+
 	id, ok := session.Values["user_id"]
 	if !ok {
-		return nil, nil
+		return nil, fmt.Errorf("user_id missing")
 	}
-	var userID int 
+
+	var userID int
 	switch v := id.(type) {
 	case int:
 		userID = v
 	case int64:
 		userID = int(v)
+	case float64:
+		userID = int(v)
 	default:
-		return nil, nil
+		return nil, fmt.Errorf("invalid user_id type: %T", v)
 	}
-	return models.GetUserByID(userID)
+
+	if userID <= 0 {
+		return nil, fmt.Errorf("invalid user_id")
+	}
+
+	user, err := models.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	return user, nil
 }
+
+
 
 func IsLoggedIn(r *http.Request) bool {
 	session, err := Store.Get(r, SessionName)
 	if err != nil {
+		log.Println("failed to get session:", err)
 		return false
 	}
-	_, ok := session.Values[
-		"user_id"]
-	return ok
+
+	userVal, ok := session.Values["user_id"]
+	if !ok {
+		return false
+	}
+
+	var userID int
+
+	switch v := userVal.(type) {
+	case int:
+		userID = v
+	case int64:
+		userID = int(v)
+	case float64: // happens with JSON/session decoding
+		userID = int(v)
+	default:
+		log.Println("unexpected user_id type:", v)
+		return false
+	}
+
+	return userID > 0
 }
 
-func RequireLogin(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func RequireLogin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		if !IsLoggedIn(r) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		next(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }
 
-func RequireAdmin(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := GetCurrentUser(r)
+func RequireAdmin(next http.Handler) http.Handler {
+	log.Println("debug")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		user, err := GetCurrentUser(r)
 		if err != nil || user == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
@@ -105,6 +156,6 @@ func RequireAdmin(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		next(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }

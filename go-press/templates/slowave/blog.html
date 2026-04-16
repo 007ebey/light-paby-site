@@ -125,7 +125,7 @@
         <li><a href="/">Home</a></li>
         <li><a href="/login">Login</a></li>
         <li><a href="#">Blog</a></li>
-        {{ if and .User (or (eq .User.Role "admin") (eq .User.Role "editor")) }}
+        {{ if .ShowAdminLinks }}
         <li><a href="/admin/posts">Edit Posts</a></li>
         {{ end }}
       </ul>
