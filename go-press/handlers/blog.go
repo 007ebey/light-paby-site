@@ -1,30 +1,54 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+	"strings"
+	"log"
+
+	"github.com/gorilla/mux"
+
 	"word_press/models"
 	"word_press/auth"
 	"word_press/services"
-	"net/http"
-	"github.com/gorilla/mux"
-    "strconv"
-	"log"
-	"strings"
 )
 
 type BlogHandler struct {
 	PostService    services.PostService
 	CommentService services.CommentService
+
+	GetUser func(*http.Request) (*models.User, error)
+	Render  func(http.ResponseWriter, RenderOptions)
 }
 
 func NewBlogHandler(ps services.PostService, cs services.CommentService) *BlogHandler {
 	return &BlogHandler{
 		PostService:    ps,
 		CommentService: cs,
+		GetUser:        auth.GetCurrentUser,
+		Render:         RenderWithOpts,
 	}
 }
 
+//
+// ===== COMMON RENDER =====
+//
+
+func (h *BlogHandler) render(w http.ResponseWriter, page string, data map[string]interface{}) {
+	h.Render(w, RenderOptions{
+		Page:   page,
+		Header: "blog-header.html",
+		Footer: "default",
+		Data:   data,
+	})
+}
+
+//
+// ===== BLOG POST =====
+//
+
 func (h *BlogHandler) BlogPost(w http.ResponseWriter, r *http.Request) {
-	user, _ := auth.GetCurrentUser(r)
+	user, _ := h.GetUser(r)
 
 	slug := mux.Vars(r)["slug"]
 
@@ -36,22 +60,20 @@ func (h *BlogHandler) BlogPost(w http.ResponseWriter, r *http.Request) {
 
 	comments, err := h.CommentService.GetCommentsByPost(post.ID)
 	if err != nil {
-		// don't break page, just log
 		log.Println("comments error:", err)
 		comments = []models.Comment{}
 	}
 
-	RenderWithOpts(w, RenderOptions{
-		Page:   "blog-post.html",
-		Header: "blog-header.html",
-		Footer: "default",
-		Data: map[string]interface{}{
-			"Post":     post,
-			"Comments": comments,
-			"User":     user,
-		},
+	h.render(w, "blog-post.html", map[string]interface{}{
+		"Post":     post,
+		"Comments": comments,
+		"User":     user,
 	})
 }
+
+//
+// ===== CREATE COMMENT =====
+//
 
 func (h *BlogHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 
@@ -81,6 +103,10 @@ func (h *BlogHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/blog/"+slug+"?comment=success#comments", http.StatusSeeOther)
 }
 
+//
+// ===== DELETE COMMENT =====
+//
+
 func (h *BlogHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
@@ -88,8 +114,8 @@ func (h *BlogHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := auth.GetCurrentUser(r)
-	if err != nil {
+	user, err := h.GetUser(r)
+	if err != nil || user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -114,7 +140,6 @@ func (h *BlogHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 🔐 Authorization
 	isOwner := comment.Email == user.Email
 	isAdmin := user.Role == "admin"
 
@@ -123,8 +148,7 @@ func (h *BlogHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.CommentService.DeleteComment(id)
-	if err != nil {
+	if err := h.CommentService.DeleteComment(id); err != nil {
 		http.Error(w, "Failed to delete comment", http.StatusInternalServerError)
 		return
 	}

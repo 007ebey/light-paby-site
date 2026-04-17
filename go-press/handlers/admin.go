@@ -1,39 +1,60 @@
 package handlers
 
 import (
-	"word_press/models"
-	"word_press/auth"
-	"word_press/utils"
-	"word_press/services"
 	"net/http"
+	"strconv"
+
 	"github.com/gorilla/mux"
-    "strconv"
+
+	"word_press/auth"
+	"word_press/models"
+	"word_press/services"
+	"word_press/utils"
 )
 
 type AdminHandler struct {
-	PostService services.PostService
-	ImageService services.ImageService
+	PostService    services.PostService
+	ImageService   services.ImageService
 	ContactService services.ContactService
+
+	GetUser func(*http.Request) (*models.User, error)
+	Render  func(http.ResponseWriter, RenderOptions)
 }
 
-var getCurrentUser = auth.GetCurrentUser
-var render = RenderWithOpts
-
-func NewAdminHandler(s services.PostService, is services.ImageService, cs services.ContactService) *AdminHandler {
+func NewAdminHandler(ps services.PostService, is services.ImageService, cs services.ContactService) *AdminHandler {
 	return &AdminHandler{
-		PostService: s,
-		ImageService: is,
+		PostService:    ps,
+		ImageService:   is,
 		ContactService: cs,
+		GetUser:        auth.GetCurrentUser,
+		Render:         RenderWithOpts,
 	}
 }
 
+//
+// ===== COMMON RENDER =====
+//
+
+func (h *AdminHandler) render(w http.ResponseWriter, page string, data map[string]interface{}) {
+	h.Render(w, RenderOptions{
+		Page:   page,
+		Header: "posts-header.html",
+		Footer: "posts-footer.html",
+		Data:   data,
+	})
+}
+
+//
+// ===== POSTS =====
+//
+
 func (h *AdminHandler) AdminPosts(w http.ResponseWriter, r *http.Request) {
-	user, _ := getCurrentUser(r)
+	user, _ := h.GetUser(r)
 
 	if user == nil {
-	  http.Error(w, "Unauthorized", 401)
-	  return
-    }
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	posts, err := h.PostService.GetAllPosts()
 	if err != nil {
@@ -41,25 +62,20 @@ func (h *AdminHandler) AdminPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, RenderOptions{
-		Page:   "admin/posts.html",
-		Header: "posts-header.html",
-		Footer: "posts-footer.html",
-		Data: map[string]interface{}{
-			"SiteTitle": "Manage Posts",
-		    "Posts": posts,
-		    "User": user,
-		},
+	h.render(w, "admin/posts.html", map[string]interface{}{
+		"SiteTitle": "Manage Posts",
+		"Posts":     posts,
+		"User":      user,
 	})
 }
 
 func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
-	user, _ := getCurrentUser(r)
+	user, _ := h.GetUser(r)
 
 	if user == nil {
-	  http.Error(w, "Unauthorized", 401)
-	  return
-    }
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	data := map[string]interface{}{
 		"SiteTitle": "Create Post",
@@ -80,12 +96,7 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 				"slug":    slug,
 				"content": content,
 			}
-			render(w, RenderOptions{
-		          Page:   "admin/create-post.html",
-		          Header: "posts-header.html",
-		          Footer: "posts-footer.html",
-		          Data: data,
-	        })
+			h.render(w, "admin/create-post.html", data)
 			return
 		}
 
@@ -113,18 +124,12 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 			Status:        status,
 			Excerpt:       excerpt,
 			FeaturedImage: imagePath,
-			AuthorID:        user.ID,
+			AuthorID:      user.ID,
 		}
 
-		err = h.PostService.CreatePost(post)
-		if err != nil {
+		if err := h.PostService.CreatePost(post); err != nil {
 			data["Error"] = err.Error()
-			render(w, RenderOptions{
-		          Page:   "admin/create-post.html",
-		          Header: "posts-header.html",
-		          Footer: "posts-footer.html",
-		          Data: data,
-	        })
+			h.render(w, "admin/create-post.html", data)
 			return
 		}
 
@@ -132,24 +137,18 @@ func (h *AdminHandler) AdminCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, RenderOptions{
-		Page:   "admin/create-post.html",
-		Header: "posts-header.html",
-		Footer: "posts-footer.html",
-		Data: data,
-	})
+	h.render(w, "admin/create-post.html", data)
 }
 
 func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
-	user, _ := getCurrentUser(r)
+	user, _ := h.GetUser(r)
 
 	if user == nil {
-	  http.Error(w, "Unauthorized", 401)
-	  return
-    }
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-	idStr := mux.Vars(r)["id"]
-	id, _ := strconv.Atoi(idStr)
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	post, err := h.PostService.GetPostByID(id)
 	if err != nil {
@@ -164,42 +163,29 @@ func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
-		title := r.FormValue("title")
-		slug := r.FormValue("slug")
-		content := r.FormValue("content")
-		status := r.FormValue("status")
-		excerpt := r.FormValue("excerpt")
-
-		imagePath := post.FeaturedImage
+		post.Title = r.FormValue("title")
+		post.Slug = r.FormValue("slug")
+		post.Content = r.FormValue("content")
+		post.Status = r.FormValue("status")
+		post.Excerpt = r.FormValue("excerpt")
 
 		file, handler, err := r.FormFile("featured_image")
 		if err == nil {
 			defer file.Close()
 
-			imagePath, err = h.ImageService.SaveImage(file, handler.Filename, handler.Size)
+			imagePath, err := h.ImageService.SaveImage(file, handler.Filename, handler.Size)
 			if err != nil {
 				http.Error(w, "Image upload failed", http.StatusBadRequest)
 				return
 			}
+			post.FeaturedImage = imagePath
 		}
 
-		post.Title = title
-		post.Slug = slug
-		post.Content = content
-		post.Status = status
-		post.Excerpt = excerpt
-		post.FeaturedImage = imagePath
 		post.AuthorID = user.ID
 
-		err = h.PostService.UpdatePost(post)
-		if err != nil {
+		if err := h.PostService.UpdatePost(post); err != nil {
 			data["Error"] = err.Error()
-			render(w, RenderOptions{
-		      Page:   "admin/edit-post.html",
-		      Header: "posts-header.html",
-		      Footer: "posts-footer.html",
-		      Data: data,
-	        })
+			h.render(w, "admin/edit-post.html", data)
 			return
 		}
 
@@ -207,44 +193,37 @@ func (h *AdminHandler) AdminEditPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, RenderOptions{
-		Page:   "admin/edit-post.html",
-		Header: "posts-header.html",
-		Footer: "posts-footer.html",
-		Data: data,
-	})
+	h.render(w, "admin/edit-post.html", data)
 }
 
 func (h *AdminHandler) AdminDeletePost(w http.ResponseWriter, r *http.Request) {
-	idStr := mux.Vars(r)["id"]
-
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	// 🔥 get post first (for image cleanup)
 	post, err := h.PostService.GetPostByID(id)
 	if err != nil || post == nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	// 🔥 delete post via service
-	err = h.PostService.DeletePost(id)
-	if err != nil {
+	if err := h.PostService.DeletePost(id); err != nil {
 		http.Error(w, "Failed to delete post", http.StatusInternalServerError)
 		return
 	}
 
-	// 🔥 optional: delete image (IMPORTANT)
 	if post.FeaturedImage != "" {
 		h.ImageService.DeleteImage(post.FeaturedImage)
 	}
 
 	http.Redirect(w, r, "/admin/posts", http.StatusSeeOther)
 }
+
+//
+// ===== CONTACTS =====
+//
 
 func (h *AdminHandler) ManageQueries(w http.ResponseWriter, r *http.Request) {
 
@@ -254,7 +233,7 @@ func (h *AdminHandler) ManageQueries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, RenderOptions{
+	h.Render(w, RenderOptions{
 		Page:   "admin/contact.html",
 		Header: "contact-header.html",
 		Footer: "contact-footer.html",
@@ -272,11 +251,7 @@ func (h *AdminHandler) MarkContactRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil || id == 0 {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(r.FormValue("id"))
 
 	if err := h.ContactService.MarkAsRead(id); err != nil {
 		http.Error(w, "Failed to update contact", http.StatusInternalServerError)
@@ -293,11 +268,7 @@ func (h *AdminHandler) DeleteContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil || id == 0 {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(r.FormValue("id"))
 
 	if err := h.ContactService.DeleteContact(id); err != nil {
 		http.Error(w, "Failed to delete contact", http.StatusInternalServerError)

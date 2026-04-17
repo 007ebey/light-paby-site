@@ -20,14 +20,14 @@ func main() {
 	// SERVICES + HANDLERS
 	// =========================
 
-	// Auth
-	userRepo := services.NewUserRepository()
-	authService := services.NewAuthService(userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
-
 	// Posts
 	postRepo := services.NewPostRepository()
 	postService := services.NewPostService(postRepo)
+
+	// Auth
+	userRepo := services.NewUserRepository()
+	authService := services.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService, postService)
 
 	contactRepo := services.NewContactRepository()
 	contactService := services.NewContactService(contactRepo)
@@ -44,13 +44,14 @@ func main() {
 	// Blog
 	blogHandler := handlers.NewBlogHandler(postService, commentService)
 
+	pageHandler := handlers.NewPageHandler(postService, contactService)
+
 	// =========================
 	// PUBLIC ROUTES
 	// =========================
 
-	r.HandleFunc("/", handlers.Home).Methods("GET")
-	r.HandleFunc("/index2", handlers.Home2).Methods("GET")
-	r.HandleFunc("/contact", handlers.Contact).Methods("POST")
+	r.HandleFunc("/", pageHandler.Home).Methods("GET")
+	r.HandleFunc("/contact", pageHandler.Contact).Methods("POST")
 
 	// Auth
 	r.HandleFunc("/login", authHandler.Login)
@@ -63,7 +64,7 @@ func main() {
 	blog := r.PathPrefix("/blog").Subrouter()
 	blog.Use(auth.RequireLogin)
 
-	blog.HandleFunc("", handlers.Blog) // /blog
+	blog.HandleFunc("", pageHandler.Blog) // /blog
 	blog.HandleFunc("/{slug}", blogHandler.BlogPost)
 	blog.HandleFunc("/{slug}/comment", blogHandler.CreateComment).Methods("POST")
 	blog.HandleFunc("/{slug}/comment/delete", blogHandler.DeleteComment).Methods("POST")

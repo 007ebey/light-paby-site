@@ -6,6 +6,7 @@ import (
 )
 
 type ContactService interface {
+	CreateContact(name, email, message, ip string) error
 	GetAllContacts() ([]models.Contact, error)
 	MarkAsRead(id int) error
 	DeleteContact(id int) error
@@ -35,4 +36,8 @@ func (s *contactService) DeleteContact(id int) error {
 		return errors.New("invalid contact ID")
 	}
 	return s.repo.Delete(id)
+}
+
+func (s *contactService) CreateContact(name, email, message, ip string) error {
+	return s.repo.CreateContact(name, email, message, ip)
 }

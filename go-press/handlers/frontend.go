@@ -1,13 +1,34 @@
 package handlers
 
 import (
-	"net/http"
-    "word_press/models"
 	"log"
+	"net/http"
 	"strconv"
+    "strings"
+	"word_press/auth"
+	"word_press/models"
+	"word_press/services"
 )
 
-func Home(w http.ResponseWriter, r *http.Request) {
+const pageLimit = 10
+
+type PageHandler struct {
+	PostService services.PostService
+    ContactService services.ContactService
+	GetUser func(*http.Request) (*models.User, error)
+	Render  func(http.ResponseWriter, RenderOptions)
+}
+
+func NewPageHandler(ps services.PostService, cs services.ContactService) *PageHandler {
+	return &PageHandler{
+		PostService: ps,
+		ContactService: cs,
+		GetUser:     auth.GetCurrentUser,
+		Render:      RenderWithOpts,
+	}
+}
+
+func (h *PageHandler) Home(w http.ResponseWriter, r *http.Request) {
 	success := r.URL.Query().Get("success")
 
 	data := map[string]interface{}{
@@ -18,82 +39,129 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		data["Success"] = "Your message has been sent successfully!"
 	}
 
-	RenderWithOpts(w, RenderOptions{
-		Page: "updated-index.html",
-        Header: "home-header.html",
+	h.Render(w, RenderOptions{
+		Page:   "updated-index.html",
+		Header: "home-header.html",
 		Footer: "default",
-		Data: data,
+		Data:   data,
 	})
 }
 
-func Home2(w http.ResponseWriter, r *http.Request) {
-	Render(w, "index2.html", map[string]interface{}{
-		"SiteTitle": "Cool Site: Layout 2",
-	})
-}
-
-func SliderAdmin(w http.ResponseWriter, r *http.Request) {
-	Render(w, "admin/create-slider.html", map[string]interface{}{
-		"SiteTitle": "Admin: Slide Add",
-	})
-}
-
-func AdminSliders(w http.ResponseWriter, r *http.Request) {
-	Render(w, "admin/sliders.html", map[string]interface{}{
-		"SiteTitle": "Admin: Slide",
-	})
-}
-
-func Blog(w http.ResponseWriter, r *http.Request) {
-    // We only want to show "published" posts to the public
-    pageStr := r.URL.Query().Get("page")
+func (h *PageHandler) Blog(w http.ResponseWriter, r *http.Request) {
 	page := 1
 
-	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+	if p, err := strconv.Atoi(r.URL.Query().Get("page")); err == nil && p > 0 {
 		page = p
 	}
 
-	limit := 10
-	offset := (page - 1) * limit
-
-	posts, err := models.GetPostsByStatusPaginated("published", limit, offset)
+	posts, totalPages, err := h.PostService.GetPublishedPosts(page, pageLimit)
 	if err != nil {
 		log.Println("Blog fetch error:", err)
 		http.Error(w, "Unable to load the blog at this time", http.StatusInternalServerError)
 		return
 	}
-	allPosts, err := models.GetPostsByStatus("published")
+
+	user, err := h.GetUser(r)
 	if err != nil {
-		http.Error(w, "Count error", http.StatusInternalServerError)
-		return 
+		log.Println("user fetch error:", err)
 	}
-	total := len(allPosts)
-	totalPages := (total + limit - 1) / limit
 
-	var showAdminLinks bool
-	user, ok := r.Context().Value("user").(*models.User)
-	if ok && user != nil {
-	    if user.Role == "admin" || user.Role == "editor" {
-			showAdminLinks = true
+	showAdminLinks := user != nil &&
+		(user.Role == "admin" || user.Role == "editor")
+
+	h.Render(w, RenderOptions{
+		Page:   "blog.html",
+		Header: "home-header.html",
+		Footer: "default",
+		Data: map[string]interface{}{
+			"SiteTitle":      "Blog",
+			"Posts":          posts,
+			"Page":           page,
+			"TotalPages":     totalPages,
+			"ShowAdminLinks": showAdminLinks,
+		},
+	})
+}
+
+func (h *PageHandler) Contact(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
+		success := r.URL.Query().Get("success")
+
+		data := map[string]interface{}{
+			"SiteTitle": "Pastor Aby & Pastor Smitha",
 		}
-	}
 
-	log.Println("Show admin link", showAdminLinks)
+		if success == "1" {
+			data["Success"] = "Your message has been sent successfully!"
+		}
 
-	log.Println("Number of blogs gotten", totalPages)
-
-	data :=  map[string]interface{}{
-		"SiteTitle":  "Blog",
-		"Posts":      posts,
-		"Page":       page,
-		"TotalPages": totalPages,
-		"ShowAdminLinks": showAdminLinks, 
-	}
-	RenderWithOpts(w, RenderOptions{
-			Page:   "blog.html",
+		h.Render(w, RenderOptions{
+			Page:   "updated-index.html",
 			Header: "home-header.html",
 			Footer: "default",
 			Data:   data,
+		})
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	if r.FormValue("form_type") != "contact" {
+		http.Error(w, "Invalid form submission", http.StatusBadRequest)
+		return
+	}
+
+	name := strings.TrimSpace(r.FormValue("name"))
+	email := strings.TrimSpace(r.FormValue("email"))
+	message := strings.TrimSpace(r.FormValue("message"))
+
+	if name == "" || email == "" || message == "" {
+		h.renderContactError(w, "All fields are required", name, email, message)
+		return
+	}
+
+	if !strings.Contains(email, "@") {
+		h.renderContactError(w, "Invalid email address", name, email, message)
+		return
+	}
+
+	ip := r.RemoteAddr
+
+	err := h.ContactService.CreateContact(name, email, message, ip)
+	if err != nil {
+		log.Println("Failed to save contact:", err)
+		h.renderContactError(w, "Something went wrong. Please try again", name, email, message)
+		return
+	}
+
+	http.Redirect(w, r, "/?success=1#contact-form", http.StatusSeeOther)
+}
+
+func (h *PageHandler) renderContactError(
+	w http.ResponseWriter,
+	msg, name, email, message string,
+) {
+	h.Render(w, RenderOptions{
+		Page:   "updated-index.html",
+		Header: "home-header.html",
+		Footer: "default",
+		Data: map[string]interface{}{
+			"SiteTitle": "Pastor Aby & Pastor Smitha",
+			"Error":     msg,
+			"FormData": map[string]string{
+				"name":    name,
+				"email":   email,
+				"message": message,
+			},
+		},
 	})
-	return
 }

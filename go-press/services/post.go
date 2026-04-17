@@ -16,6 +16,8 @@ type PostService interface {
 	CreatePost(post *models.Post) error
 	UpdatePost(post *models.Post) error
 	DeletePost(id int) error
+	GetRecentPosts(limit int) ([]models.Post, error)
+	GetPublishedPosts(page, limit int) ([]models.Post, int, error)
 }
 
 func NewPostService(repo PostRepository) PostService {
@@ -58,4 +60,27 @@ func (s *postService) DeletePost(id int) error {
 	}
 
 	return s.repo.Delete(id)
+}
+
+func (s *postService) GetRecentPosts(limit int) ([]models.Post, error) {
+	return s.repo.GetRecentPosts(limit), nil
+}
+
+func (s *postService) GetPublishedPosts(page, limit int) ([]models.Post, int, error) {
+	offset := (page - 1) * limit
+
+	posts, err := models.GetPostsByStatusPaginated("published", limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	allPosts, err := models.GetPostsByStatus("published")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total := len(allPosts)
+	totalPages := (total + limit - 1) / limit
+
+	return posts, totalPages, nil
 }
