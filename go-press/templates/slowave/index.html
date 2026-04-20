@@ -216,7 +216,7 @@
         </span>
       </div>
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-12" id="contact">
           <div class="form-container"> {{ if .Error }} <div class="alert alert-danger"> {{ .Error }} </div> {{ end }} {{
             if .Success }} <div class="alert alert-success"> {{ .Success }} </div> {{ end }} <form class="forms"
               action="/contact" method="POST"> <input type="hidden" name="form_type" value="contact">
