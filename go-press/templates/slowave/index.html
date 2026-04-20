@@ -7,11 +7,11 @@
       <li data-transition="fade">
         <img src="style/images/art/slider-bg1.jpg" alt="" />
 
-        <div class="caption sfb bold text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
+        <div class="caption sfb bold huge text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
           Reveal Jesus. Restore lives.
         </div>
 
-        <div class="caption sfb lite small text-center" data-x="center" data-y="260" data-speed="900" data-start="1500">
+        <div class="caption sfb lite big text-center" data-x="center" data-y="260" data-speed="900" data-start="1500">
           Aby P Rajan & Pastor Smitha<br />
           Serving at HisNearness Church, Bengaluru
         </div>
@@ -35,7 +35,7 @@
     <div class="row text-center col-services-2">
 
       <div class="col-sm-4 col">
-        <div class="icon-border bm10"><i class="icon-picons-heart"></i></div>
+        <div class="icon-border bm10"><i class="icon-picons-gift"></i></div>
         <h5 class="upper colored">Marriage Counselling</h5>
         <p>
           Together, we walk with couples seeking restoration and direction.
@@ -54,7 +54,7 @@
       </div>
 
       <div class="col-sm-4 col">
-        <div class="icon-border bm10"><i class="icon-picons-user"></i></div>
+        <div class="icon-border bm10"><i class="icon-picons-support"></i></div>
         <h5 class="upper colored">Personal Counselling</h5>
         <p>
           Through prayer and one-on-one guidance, we help restore joy, identity,
@@ -126,19 +126,19 @@
       <span class="timeline-border"></span>
 
       <div class="step">
-        <div class="icon-border"><i class="icon-picons-user"></i></div>
+        <div class="icon-border"><i class="icon-picons-bulb"></i></div>
         <h5 class="upper">Build People</h5>
         <p>We focus on people, not just programs.</p>
       </div>
 
       <div class="step even">
-        <div class="icon-border"><i class="icon-picons-heart"></i></div>
+        <div class="icon-border"><i class="icon-picons-earth"></i></div>
         <h5 class="upper">Restore Wholeness</h5>
         <p>Walking with individuals into healing and identity.</p>
       </div>
 
       <div class="step">
-        <div class="icon-border"><i class="icon-picons-lightbulb"></i></div>
+        <div class="icon-border"><i class="icon-picons-chart-6"></i></div>
         <h5 class="upper">Equip</h5>
         <p>Preparing people for their God-given assignments.</p>
       </div>
@@ -206,6 +206,40 @@
   </div>
 </div>
 
+<div class="parallax contact">
+  <div class="container inner">
+    <div class="thin">
+      <div class="section-title text-center">
+        <h2>Get In Touch With Us</h2>
+        <span class="icon">
+          <i class="fa-solid fa-envelope"></i>
+        </span>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-container"> {{ if .Error }} <div class="alert alert-danger"> {{ .Error }} </div> {{ end }} {{
+            if .Success }} <div class="alert alert-success"> {{ .Success }} </div> {{ end }} <form class="forms"
+              action="/contact" method="POST"> <input type="hidden" name="form_type" value="contact">
+              <div class="row">
+                <div class="col-sm-6"> <input type="text" name="name" class="text-input form-control"
+                    placeholder="Your Name" value="{{ with .FormData }}{{ index . " name" }}{{ end }}" required> </div>
+                <div class="col-sm-6"> <input type="email" name="email" class="text-input form-control"
+                    placeholder="Your Email" value="{{ with .FormData }}{{ index . " email" }}{{ end }}" required>
+                </div>
+              </div>
+              <div class="divide20"></div> <textarea name="message" class="text-area form-control" rows="5"
+                placeholder="Your Message" required>{{ with .FormData }}{{ index . "message" }}{{ end }}</textarea>
+              <div class="divide20"></div> <button type="submit" class="btn btn-submit bm0"> Send Message </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+  </div>
+  <!-- /.container -->
+</div>
+
 <div class="color-wrapper">
   <div class="container inner text-center">
     <p class="lead">
@@ -214,6 +248,8 @@
     <a href="#contact" class="btn">Book a Session</a>
   </div>
 </div>
+
+
 <!-- /footer -->
 
 {{ end }}
