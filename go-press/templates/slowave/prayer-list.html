@@ -1,0 +1,51 @@
+{{ define "content" }}
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>Prayer List</h1>
+  </div>
+</div>
+
+<div class="container inner">
+
+  <div class="row">
+    {{ range .Prayers }}
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-body">
+
+          <h4>{{ .Title }}</h4>
+          <p>{{ .Content }}</p>
+
+          <!-- 🔴 Delete Button -->
+          <form method="POST" action="/prayer/list/delete" style="margin-top:10px;">
+            <input type="hidden" name="id" value="{{ .ID }}">
+            <button 
+              class="btn btn-red btn-sm"
+              onclick="return confirm('Delete this prayer?');"
+            >
+              Delete
+            </button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+    {{ else }}
+    <p>No prayers yet.</p>
+    {{ end }}
+  </div>
+
+  <hr />
+
+  <h3>Add Prayer</h3>
+
+  <form method="POST" action="/prayer/list/create">
+    <input class="form-control" name="title" placeholder="Title"><br>
+    <textarea class="form-control" name="content" placeholder="Prayer..." rows="4"></textarea><br>
+    <button class="btn btn-green">Add</button>
+  </form>
+
+</div>
+
+{{ end }}

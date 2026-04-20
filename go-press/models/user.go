@@ -16,6 +16,8 @@ type User struct {
 	Password string
 	Role     string
 	CreatedAt time.Time
+	Country string
+    City    string
 }
 
 func CreateUser(username, email, password, role string) error {

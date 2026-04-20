@@ -1,0 +1,37 @@
+{{ define "content" }}
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>Vision Notes</h1>
+  </div>
+</div>
+
+<div class="container inner">
+
+  <div class="row">
+    {{ range .Notes }}
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <p>{{ .Content }}</p>
+          <small>{{ .CreatedAt }}</small>
+        </div>
+      </div>
+    </div>
+    {{ else }}
+    <p>No notes yet.</p>
+    {{ end }}
+  </div>
+
+  <hr />
+
+  <h3>Add Vision Note</h3>
+
+  <form method="POST" action="/vision/create">
+    <textarea class="form-control" name="content" rows="4"></textarea><br>
+    <button class="btn btn-purple">Save</button>
+  </form>
+
+</div>
+
+{{ end }}

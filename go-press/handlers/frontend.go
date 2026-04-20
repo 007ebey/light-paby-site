@@ -40,9 +40,9 @@ func (h *PageHandler) Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Render(w, RenderOptions{
-		Page:   "updated-index.html",
+		Page:   "index.html",
 		Header: "home-header.html",
-		Footer: "default",
+		Footer: "index-footer.html",
 		Data:   data,
 	})
 }
@@ -97,9 +97,9 @@ func (h *PageHandler) Contact(w http.ResponseWriter, r *http.Request) {
 		}
 
 		h.Render(w, RenderOptions{
-			Page:   "updated-index.html",
+			Page:   "index.html",
 			Header: "home-header.html",
-			Footer: "default",
+			Footer: "index-footer.html",
 			Data:   data,
 		})
 		return
@@ -151,9 +151,9 @@ func (h *PageHandler) renderContactError(
 	msg, name, email, message string,
 ) {
 	h.Render(w, RenderOptions{
-		Page:   "updated-index.html",
+		Page:   "index.html",
 		Header: "home-header.html",
-		Footer: "default",
+		Footer: "index-footer.html",
 		Data: map[string]interface{}{
 			"SiteTitle": "Pastor Aby & Pastor Smitha",
 			"Error":     msg,

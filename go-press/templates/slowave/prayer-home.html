@@ -1,0 +1,62 @@
+{{ define "content" }}
+
+<div class="light-wrapper page-title">
+  <div class="container inner">
+    <h1>{{ .Greeting }}</h1>
+  </div>
+</div>
+
+<div class="dark-wrapper">
+  <div class="container inner text-center">
+
+    <h2>Total Prayer Time</h2>
+    <h1 style="font-size: 48px;">{{ .TotalTime }}</h1>
+
+    <div class="divide30"></div>
+
+    <div class="row">
+      <div class="col-sm-4">
+        <h3>Active Users</h3>
+        <h2>{{ .ActiveUsers }}</h2>
+      </div>
+
+      <div class="col-sm-4">
+        <h3>Countries</h3>
+        <h2>{{ .Countries }}</h2>
+      </div>
+
+      <div class="col-sm-4">
+        <h3>Cities</h3>
+        <h2>{{ .Cities }}</h2>
+      </div>
+    </div>
+
+    <div class="divide40"></div>
+
+    <p class="lead">
+      “Where two or three gather in prayer, power is released.”
+    </p>
+
+    <div class="divide20"></div>
+
+    <form method="POST" action="/prayer/start">
+      <button class="btn btn-large btn-blue">🙏 Prayer Now</button>
+    </form>
+
+    <div class="divide20"></div>
+
+    <form method="POST" action="/prayer/end">
+      <input type="hidden" name="session_id" value="{{ .SessionID }}">
+      <button class="btn btn-large btn-red">⏹ End Prayer</button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+setInterval(() => {
+  fetch("/prayer/heartbeat", { method: "POST" });
+}, 10000);
+</script>
+
+{{ end }}

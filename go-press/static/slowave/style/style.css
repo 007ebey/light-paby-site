@@ -3129,10 +3129,10 @@ input:focus:-ms-input-placeholder {
     background-attachment: scroll !important
 }
 .parallax.contact {
-    background-image: url(style/images/art/parallax1.jpg)
+    background-image: url(/style/images/art/parallax1.jpg)
 }
 .parallax.testimonials {
-    background-image: url(style/images/art/parallax2.jpg)
+    background-image: url(/style/images/art/parallax2.jpg)
 }
 .contact-info {
     margin: 0;

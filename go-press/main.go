@@ -9,6 +9,7 @@ import (
 	"word_press/database"
 	"word_press/handlers"
 	"word_press/services"
+	"word_press/realtime"
 )
 
 func main() {
@@ -32,6 +33,12 @@ func main() {
 	contactRepo := services.NewContactRepository()
 	contactService := services.NewContactService(contactRepo)
 
+	presenceManager := realtime.NewPresenceManager(6000)
+
+	prayerService := services.NewPrayerService()
+	presenceService := services.NewPresenceService(presenceManager)
+	
+
 	// Image
 	imageService := services.NewImageService()
 
@@ -45,6 +52,8 @@ func main() {
 	blogHandler := handlers.NewBlogHandler(postService, commentService)
 
 	pageHandler := handlers.NewPageHandler(postService, contactService)
+
+	prayerHandler := handlers.NewPrayerHandler(prayerService, presenceService)
 
 	// =========================
 	// PUBLIC ROUTES
@@ -91,6 +100,25 @@ func main() {
 
 	// register (admin only now)
 	admin.HandleFunc("/register", authHandler.Register)
+
+	r.HandleFunc("/vision-notes", prayerHandler.VisionNotes)
+    r.HandleFunc("/vision/create", prayerHandler.CreateVisionNote)
+
+	prayer := r.PathPrefix("/prayer").Subrouter()
+
+	prayer.HandleFunc("", prayerHandler.Home)
+    prayer.HandleFunc("/start", prayerHandler.Start).Methods("POST")
+    prayer.HandleFunc("/end", prayerHandler.End).Methods("POST")
+    prayer.HandleFunc("/heartbeat", prayerHandler.Heartbeat).Methods("POST")
+
+
+    prayer.HandleFunc("/list", prayerHandler.PrayerList)
+	prayer.HandleFunc("/list/create", prayerHandler.CreatePrayer).Methods("POST")
+	prayer.HandleFunc("/list/delete", prayerHandler.DeletePrayer).Methods("POST")
+
+    r.HandleFunc("/vision-notes", prayerHandler.VisionNotes)
+    r.HandleFunc("/vision/create", prayerHandler.CreateVisionNote)
+    r.HandleFunc("/fellow-prayers", prayerHandler.Fellow)
 
 	// =========================
 	// STATIC FILES
