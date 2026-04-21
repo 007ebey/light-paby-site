@@ -4046,3 +4046,41 @@ input:focus:-ms-input-placeholder {
 	    overflow-y: scroll;
 	}
 }
+
+/*-----------------------------------------------------------------------------------*/
+/*	TEST ANIMATION
+/*-----------------------------------------------------------------------------------*/
+
+/* Base state */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(30px);
+  will-change: transform, opacity;
+}
+
+/* When visible */
+[data-animate].in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variants */
+[data-animate="fade"] {
+  transform: none;
+}
+
+[data-animate="fade-up"] {
+  transform: translateY(30px);
+}
+
+[data-animate="fade-left"] {
+  transform: translateX(40px);
+}
+
+[data-animate="fade-right"] {
+  transform: translateX(-40px);
+}
+
+[data-animate="zoom"] {
+  transform: scale(0.92);
+}
