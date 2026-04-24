@@ -14,7 +14,11 @@
       <div class="panel panel-default text-center">
         <div class="panel-body">
           <h4>{{ .Username }}</h4>
-          <p>{{ .Country }} / {{ .City }}</p>
+          {{ if .IsAdmin }}
+            <p>India / Bangalore</p>    
+          {{ else }}
+            <p>{{ .Country }} / {{ .City }}</p>
+          {{ end }}
         </div>
       </div>
     </div>

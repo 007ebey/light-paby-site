@@ -6,92 +6,140 @@ import (
 	"word_press/models"
 )
 
-type PresenceManager struct {
-	mu       sync.RWMutex
-	users    map[int]models.User
-	lastSeen map[int]time.Time
+const numShards = 32
 
-	ttl time.Duration
+type presenceEntry struct {
+	user models.User
+	lastSeen int64
+}
+
+type shard struct {
+	mu sync.RWMutex
+	users map[int]*presenceEntry
+}
+
+type PresenceManager struct {
+	shards   []shard
+	ttl      time.Duration
+	stopCh   chan struct{}
 }
 
 func NewPresenceManager(ttl time.Duration) *PresenceManager {
 	pm := &PresenceManager{
-		users:    make(map[int]models.User),
-		lastSeen: make(map[int]time.Time),
-		ttl:      ttl,
-	}
+	 ttl:    ttl,
+	 shards: make([]shard, numShards),
+	 stopCh: make(chan struct{}),
+    }
+
+	for i := 0; i < numShards; i++ {
+	  pm.shards[i] = shard{
+	  	users: make(map[int]*presenceEntry),
+	  }
+    }
 
 	go pm.cleanupLoop()
 
 	return pm
 }
 
-func (p *PresenceManager) AddOrUpdateUser(u models.User) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+func (p *PresenceManager) getShard(userID int) *shard {
+	return &p.shards[userID%numShards]
+}
 
-	p.users[u.ID] = u
-	p.lastSeen[u.ID] = time.Now()
+func (p *PresenceManager) AddOrUpdateUser(u models.User) {
+	s := p.getShard(u.ID)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if existing, ok := s.users[u.ID]; ok {
+	  existing.user = u
+	  existing.lastSeen = time.Now().UnixNano()
+	  return
+    }
+
+    s.users[u.ID] = &presenceEntry{
+	  user:     u,
+	  lastSeen: time.Now().UnixNano(),
+    }
 }
 
 func (p *PresenceManager) RemoveUser(userID int) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	delete(p.users, userID)
-	delete(p.lastSeen, userID)
+	s := p.getShard(userID)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.users, userID)
 }
 
 func (p *PresenceManager) GetStats() (active int, countries int, cities int) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
 	countrySet := make(map[string]struct{})
 	citySet := make(map[string]struct{})
 
-	for _, u := range p.users {
-		if u.Country != "" {
-			countrySet[u.Country] = struct{}{}
+    for i := 0; i < numShards; i++ {
+		s := p.shards[i]
+		s.mu.RLock()
+		for _, entry := range s.users {
+			active++
+
+			u := entry.user
+
+			if u.Country != "" {
+				countrySet[u.Country] = struct{}{}
+			}
+
+			if u.City != "" {
+				citySet[u.City] = struct{}{}
+			}
 		}
-		if u.City != "" {
-			citySet[u.City] = struct{}{}
-		}
+		s.mu.RUnlock()
 	}
 
-	return len(p.users), len(countrySet), len(citySet)
+	return active, len(countrySet), len(citySet)
 }
 
 func (p *PresenceManager) GetUsers() []models.User {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
-	users := make([]models.User, 0, len(p.users))
-
-	for _, u := range p.users {
-		users = append(users, u)
+	total := 0
+	for i := 0; i < numShards; i++ {
+		s := p.shards[i]
+		s.mu.RLock()
+		total += len(s.users)
+		s.mu.RUnlock()
 	}
-
+	users := make([]models.User, 0, total)
 	return users
 }
 
 func (p *PresenceManager) cleanupLoop() {
 	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
 
-	for range ticker.C {
-		p.cleanup()
+	for {
+		select {
+		case <-ticker.C:
+			p.cleanup()
+		case <-p.stopCh:
+			return
+		}
 	}
 }
 
 func (p *PresenceManager) cleanup() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	now := time.Now().UnixNano()
 
-	now := time.Now()
+	for i := 0; i < numShards; i++ {
+		s := p.shards[i]
+		s.mu.Lock()
 
-	for userID, last := range p.lastSeen {
-		if now.Sub(last) > p.ttl {
-			delete(p.users, userID)
-			delete(p.lastSeen, userID)
+		for userID, entry := range s.users {
+			if now - entry.lastSeen > p.ttl.Nanoseconds() {
+				delete(s.users, userID)
+			}
 		}
+
+		s.mu.Unlock()
 	}
+}
+
+func (p *PresenceManager) Stop() {
+	close(p.stopCh)
 }

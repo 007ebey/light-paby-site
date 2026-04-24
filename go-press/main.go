@@ -118,7 +118,8 @@ func main() {
 
     r.HandleFunc("/vision-notes", prayerHandler.VisionNotes)
     r.HandleFunc("/vision/create", prayerHandler.CreateVisionNote)
-    r.HandleFunc("/fellow-prayers", prayerHandler.Fellow)
+	
+    prayer.HandleFunc("/fellow-prayer", prayerHandler.Fellow)
 
 	// =========================
 	// STATIC FILES

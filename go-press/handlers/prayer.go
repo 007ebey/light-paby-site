@@ -54,6 +54,20 @@ func (h *PrayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	greeting := getGreeting(user.Username)
 
+	active, err := h.PrayerService.GetActive(user.ID)
+
+	if err != nil {
+	  log.Println("active session error:", err)
+    }
+
+	sessionActive := false
+    sessionStart := int64(0)
+
+    if active != nil {
+	  sessionActive = true
+	  sessionStart = active.StartTime.Unix() // IMPORTANT
+    }
+
 	h.Render(w, RenderOptions{
 		Page:   "prayer-home.html",
 		Header: "home-header.html",
@@ -65,6 +79,8 @@ func (h *PrayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 			"ActiveUsers": stats.ActiveUsers,
 			"Countries":   stats.Countries,
 			"Cities":      stats.Cities,
+			"SessionActive": sessionActive,
+		    "SessionStart":  sessionStart,
 		},
 	})
 }

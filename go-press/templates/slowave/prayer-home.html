@@ -12,6 +12,11 @@
     <h2>Total Prayer Time</h2>
     <h1 style="font-size: 48px;">{{ .TotalTime }}</h1>
 
+    <div id="liveTimerContainer" style="display: none;">
+     <h3>Current Session</h3>
+     <h1 id="liveTimer" style="font-size: 42px;">00:00:00</h1>
+    </div>
+
     <div class="divide30"></div>
 
     <div class="row">
@@ -54,6 +59,57 @@
 </div>
 
 <script>
+setInterval(() => {
+  fetch("/prayer/heartbeat", { method: "POST" });
+}, 10000);
+</script>
+
+<script type="application/json" id="session-data">
+{
+  "active": {{ .SessionActive }},
+  "start": {{ .SessionStart }}
+}
+</script>
+
+<script>
+const el = document.getElementById('session-data');
+
+let sessionActive = false;
+let sessionStart = 0;
+
+if (el) {
+  try {
+    const data = JSON.parse(el.textContent);
+    sessionActive = data.active;
+    sessionStart = data.start;
+  } catch (e) {
+    console.error("Invalid session data", e);
+  }
+}
+
+function formatTime(seconds) {
+  const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+  const s = String(seconds % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+if (sessionActive && sessionStart > 0) {
+  const container = document.getElementById("liveTimerContainer");
+  const timerEl = document.getElementById("liveTimer");
+
+  if (container && timerEl) {
+    container.style.display = "block";
+
+    setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const elapsed = now - sessionStart;
+      timerEl.innerText = formatTime(elapsed);
+    }, 1000);
+  }
+}
+
+// heartbeat (leave as is)
 setInterval(() => {
   fetch("/prayer/heartbeat", { method: "POST" });
 }, 10000);
