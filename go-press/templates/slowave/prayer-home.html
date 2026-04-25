@@ -2,66 +2,75 @@
 
 <div class="light-wrapper page-title">
   <div class="container inner">
-    <h1>{{ .Greeting }}</h1>
+    <h1 class="pull-left">{{ .Greeting }}</h1>
   </div>
 </div>
 
 <div class="dark-wrapper">
   <div class="container inner text-center">
 
-    <h2>Total Prayer Time</h2>
-    <h1 style="font-size: 48px;">{{ .TotalTime }}</h1>
+    <div class="section-title">
+      <h3 class="text-uppercase">Total Prayer Time</h3>
+      <h1 class="thin" style="font-size: 64px; margin-top: 10px;">{{ .TotalTime }}</h1>
+    </div>
 
-    <div id="liveTimerContainer" style="display: none;">
-     <h3>Current Session</h3>
-     <h1 id="liveTimer" style="font-size: 42px;">00:00:00</h1>
+    <div id="liveTimerContainer" style="display: none; margin-bottom: 30px;">
+      <h3 class="text-blue">Current Session</h3>
+      <h1 id="liveTimer" class="thin" style="font-size: 52px; color: #3f8dbf;">00:00:00</h1>
     </div>
 
     <div class="divide30"></div>
 
     <div class="row">
       <div class="col-sm-4">
-        <h3>Active Users</h3>
-        <h2>{{ .ActiveUsers }}</h2>
+        <div class="stat-item">
+          <h4 class="text-uppercase">Active Users</h4>
+          <h2 class="thin">{{ .ActiveUsers }}</h2>
+        </div>
       </div>
 
       <div class="col-sm-4">
-        <h3>Countries</h3>
-        <h2>{{ .Countries }}</h2>
+        <div class="stat-item">
+          <h4 class="text-uppercase">Countries</h4>
+          <h2 class="thin">{{ .Countries }}</h2>
+        </div>
       </div>
 
       <div class="col-sm-4">
-        <h3>Cities</h3>
-        <h2>{{ .Cities }}</h2>
+        <div class="stat-item">
+          <h4 class="text-uppercase">Cities</h4>
+          <h2 class="thin">{{ .Cities }}</h2>
+        </div>
       </div>
     </div>
 
-    <div class="divide40"></div>
+    <div class="divide50"></div>
 
-    <p class="lead">
+    <p class="lead larger">
       “Where two or three gather in prayer, power is released.”
     </p>
 
-    <div class="divide20"></div>
+    <div class="divide30"></div>
 
-    <form method="POST" action="/prayer/start">
-      <button class="btn btn-large btn-blue">🙏 Prayer Now</button>
-    </form>
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <form method="POST" action="/prayer/start" style="display: inline-block; margin: 5px;">
+          <button type="submit" class="btn btn-large btn-blue">🙏 Prayer Now</button>
+        </form>
 
-    <div class="divide20"></div>
-
-    <form method="POST" action="/prayer/end">
-      <input type="hidden" name="session_id" value="{{ .SessionID }}">
-      <button class="btn btn-large btn-red">⏹ End Prayer</button>
-    </form>
-
+        <form method="POST" action="/prayer/end" style="display: inline-block; margin: 5px;">
+          <input type="hidden" name="session_id" value="{{ .SessionID }}">
+          <button type="submit" class="btn btn-large btn-red">⏹ End Prayer</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-setInterval(() => {
-  fetch("/prayer/heartbeat", { method: "POST" });
-}, 10000);
+  setInterval(() => {
+    fetch("/prayer/heartbeat", { method: "POST" });
+  }, 10000);
 </script>
 
 <script type="application/json" id="session-data">
@@ -72,47 +81,47 @@ setInterval(() => {
 </script>
 
 <script>
-const el = document.getElementById('session-data');
+  const el = document.getElementById('session-data');
 
-let sessionActive = false;
-let sessionStart = 0;
+  let sessionActive = false;
+  let sessionStart = 0;
 
-if (el) {
-  try {
-    const data = JSON.parse(el.textContent);
-    sessionActive = data.active;
-    sessionStart = data.start;
-  } catch (e) {
-    console.error("Invalid session data", e);
+  if (el) {
+    try {
+      const data = JSON.parse(el.textContent);
+      sessionActive = data.active;
+      sessionStart = data.start;
+    } catch (e) {
+      console.error("Invalid session data", e);
+    }
   }
-}
 
-function formatTime(seconds) {
-  const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
-
-if (sessionActive && sessionStart > 0) {
-  const container = document.getElementById("liveTimerContainer");
-  const timerEl = document.getElementById("liveTimer");
-
-  if (container && timerEl) {
-    container.style.display = "block";
-
-    setInterval(() => {
-      const now = Math.floor(Date.now() / 1000);
-      const elapsed = now - sessionStart;
-      timerEl.innerText = formatTime(elapsed);
-    }, 1000);
+  function formatTime(seconds) {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
   }
-}
 
-// heartbeat (leave as is)
-setInterval(() => {
-  fetch("/prayer/heartbeat", { method: "POST" });
-}, 10000);
+  if (sessionActive && sessionStart > 0) {
+    const container = document.getElementById("liveTimerContainer");
+    const timerEl = document.getElementById("liveTimer");
+
+    if (container && timerEl) {
+      container.style.display = "block";
+
+      setInterval(() => {
+        const now = Math.floor(Date.now() / 1000);
+        const elapsed = now - sessionStart;
+        timerEl.innerText = formatTime(elapsed);
+      }, 1000);
+    }
+  }
+
+  // heartbeat (leave as is)
+  setInterval(() => {
+    fetch("/prayer/heartbeat", { method: "POST" });
+  }, 10000);
 </script>
 
 {{ end }}
