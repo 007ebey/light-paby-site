@@ -32,7 +32,7 @@ func (h *PageHandler) Home(w http.ResponseWriter, r *http.Request) {
 	success := r.URL.Query().Get("success")
 
 	data := map[string]interface{}{
-		"SiteTitle": "Pastor Aby & Pastor Smitha",
+		"SiteTitle": "Pastor Aby & Pastor Smitha George",
 	}
 
 	if success == "1" {
