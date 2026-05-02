@@ -5,19 +5,50 @@
   <div class="fullwidthbanner">
     <ul>
       <li data-transition="fade">
-        <img src="style/images/art/slider-bg1.jpg" alt="" />
+        <img src="style/images/art/DisciplineOfDaniel.jpg" alt="" />
 
         <div class="caption sfb bold huge text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
-          Reveal Jesus. Restore lives.
-        </div>
-
-        <div class="caption sfb lite big text-center" data-x="center" data-y="260" data-speed="900" data-start="1500">
-          Aby P Rajan & Pastor Smitha<br />
-          Serving at HisNearness Church, Bengaluru
+          Discipline of Daniel
         </div>
 
         <div class="caption sfb" data-x="center" data-y="340" data-speed="900" data-start="2200">
-          <a href="#contact" class="btn btn-large">Connect With Us</a>
+          <a href="#contact" class="btn btn-large">Learn more</a>
+        </div>
+      </li>
+      <li data-transition="fade">
+        <img src="style/images/art/ConsecrationOfEnoch.jpg" alt="" />
+
+        <div class="caption sfb bold huge text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
+          Consecration of Enoch
+        </div>
+
+        <div class="caption sfb" data-x="center" data-y="340" data-speed="900" data-start="2200">
+          <a href="#contact" class="btn btn-large">Learn more</a>
+        </div>
+      </li>
+      <li data-transition="fade">
+        <img src="style/images/art/PowerOfElijah.jpg" alt="" />
+
+        <div class="caption sfb bold huge text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
+          Power of Elijah
+        </div>
+
+        <div class="caption sfb" data-x="center" data-y="340" data-speed="900" data-start="2200">
+          <a href="#contact" class="btn btn-large">Learn more</a>
+        </div>
+      </li>
+
+      </li>
+      <li data-transition="fade">
+        <img src="style/images/art/WealthOfAbraham.jpg" alt="" />
+
+        <div class="caption sfb bold huge text-center" data-x="center" data-y="200" data-speed="900" data-start="800">
+          Wealth of Abraham
+        </div>
+
+
+        <div class="caption sfb" data-x="center" data-y="340" data-speed="900" data-start="2200">
+          <a href="#contact" class="btn btn-large">Learn more</a>
         </div>
       </li>
     </ul>
@@ -272,7 +303,7 @@
       </div>
 
       <div class="row">
-        <div class="col-sm-12" id="contact">
+        <div class="col-sm-8" id="contact">
 
           <div class="form-container wow animate__animated animate__fadeInUp" data-wow-delay="0.3s">
 
@@ -293,31 +324,25 @@
 
               <div class="row">
                 <div class="col-sm-6 wow animate__animated animate__fadeInUp" data-wow-delay="0.4s">
-                  <input type="text" name="name" class="text-input form-control"
-                    placeholder="Your Name"
-                    value="{{ with .FormData }}{{ index . "name" }}{{ end }}" required>
+                  <input type="text" name="name" class="text-input form-control" placeholder="Your Name"
+                    value="{{ with .FormData }}{{ index . " name" }}{{ end }}" required>
                 </div>
 
                 <div class="col-sm-6 wow animate__animated animate__fadeInUp" data-wow-delay="0.5s">
-                  <input type="email" name="email" class="text-input form-control"
-                    placeholder="Your Email"
-                    value="{{ with .FormData }}{{ index . "email" }}{{ end }}" required>
+                  <input type="email" name="email" class="text-input form-control" placeholder="Your Email"
+                    value="{{ with .FormData }}{{ index . " email" }}{{ end }}" required>
                 </div>
               </div>
 
               <div class="divide20"></div>
 
-              <textarea name="message"
-                class="text-area form-control wow animate__animated animate__fadeInUp"
-                data-wow-delay="0.6s"
-                rows="5"
-                placeholder="Your Message"
+              <textarea name="message" class="text-area form-control wow animate__animated animate__fadeInUp"
+                data-wow-delay="0.6s" rows="5" placeholder="Your Message"
                 required>{{ with .FormData }}{{ index . "message" }}{{ end }}</textarea>
 
               <div class="divide20"></div>
 
-              <button type="submit"
-                class="btn btn-submit bm0 wow animate__animated animate__fadeInUp"
+              <button type="submit" class="btn btn-submit bm0 wow animate__animated animate__fadeInUp"
                 data-wow-delay="0.7s">
                 Send Message
               </button>
@@ -326,6 +351,29 @@
           </div>
 
         </div>
+
+        <aside class="col-sm-4 sidebar lp20">
+          <div class="sidebox widget">
+            <h3>Join Us for Sunday Service</h3>
+            <p>We warmly welcome you to worship with us every Sunday. Join our vibrant faith community for prayer,
+              worship, and spiritual growth in your preferred language service.</p>
+
+            <div class="service-times">
+              <p><strong>Tamil Service:</strong> Sunday at 8:00 AM</p>
+              <p><strong>English Service:</strong> Sunday at 10:00 AM</p>
+            </div>
+
+             
+            <address>
+              <strong>1st Floor, No.141, Sri Shanti Towers</strong><br>
+              Service Rd, East of NGEF Layout, Kasturi Nagar <br>
+              Bengaluru, Karnataka 560043 <br>
+              <abbr title="Phone">P:</abbr> 079757 05046<br>
+              <!-- <abbr title="Email">E:</abbr> <a href="mailto:yourchurch@email.com">yourchurch@email.com</a> -->
+            </address>
+          </div>
+          <!-- /.widget -->
+        </aside>
       </div>
 
       <div class="clearfix"></div>
@@ -340,9 +388,8 @@
       If you are seeking guidance, prayer, or counsel, we invite you to connect with us.
     </p>
 
-    <a href="https://calendly.com/smitha-bangalore/meeting"
-       class="btn wow animate__animated animate__fadeInUp"
-       data-wow-delay="0.4s">
+    <a href="https://calendly.com/smitha-bangalore/meeting" class="btn wow animate__animated animate__fadeInUp"
+      data-wow-delay="0.4s">
       Book a Session
     </a>
 
